@@ -7,15 +7,16 @@
       [fullScreen]="true"
     ></ngx-spinner>
 
+    <!-- ProductCatalogComponent con tipos correctos -->
     <app-product-catalog
       [products]="products"
       [totalProducts]="totalProducts"
       [pageSize]="pageSize"
       [currentPage]="currentPage"
       [title]="pageTitle"
-      (pageChanged)="onPageChange($event)"
-      (categoryFilter)="onCategoryFilter($event)"
-      (search)="onSearch($event)"
+      (pageChanged)="onPageChange($event)" <!-- $event es PageEvent -->
+      (categoryFilter)="onCategoryFilter($event)" <!-- $event es string -->
+      (search)="onSearch($event)" <!-- $event es string -->
     ></app-product-catalog>
 
     <!-- Featured categories -->

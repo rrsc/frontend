@@ -1,0 +1,215 @@
+<div class="product-detail-container" *ngIf="product">
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb" aria-label="breadcrumb">
+    <ol>
+      <li><a routerLink="/store">Tienda</a></li>
+      <li><a [routerLink]="['/store/category', product.category?.slug]">{{ product.category?.name }}</a></li>
+      <li class="active">{{ product.name }}</li>
+    </ol>
+  </nav>
+
+  <div class="product-detail-content">
+    <!-- Galería de imágenes -->
+    <div class="product-gallery">
+      <div class="main-image">
+        <img [src]="selectedImage" [alt]="product.name" class="product-image" (error)="selectedImage = 'assets/images/default-product.png'">
+        
+        <!-- Badges -->
+        <div class="product-badges">
+          <span class="badge new" *ngIf="product.isNew">Nuevo</span>
+          <span class="badge discount" *ngIf="hasDiscount()">-{{ product.discount }}%</span>
+          <span class="badge featured" *ngIf="product.isFeatured">Destacado</span>
+          <span class="badge out-of-stock" *ngIf="isOutOfStock()">Agotado</span>
+          <span class="badge low-stock" *ngIf="isLowStock()">Últimas unidades</span>
+        </div>
+      </div>
+      
+      <!-- Miniaturas -->
+      <div class="thumbnails" *ngIf="product.images && product.images.length > 1">
+        <button 
+          *ngFor="let image of product.images; let i = index"
+          class="thumbnail-btn"
+          [class.active]="selectedImage === image"
+          (click)="selectImage(image)"
+          [attr.aria-label]="'Ver imagen ' + (i + 1) + ' de ' + product.name">
+          <img [src]="image" [alt]="'Miniatura ' + (i + 1)" (error)="image = 'assets/images/default-product.png'">
+        </button>
+      </div>
+    </div>
+
+    <!-- Información del producto -->
+    <div class="product-info">
+      <!-- Encabezado -->
+      <div class="product-header">
+        <h1 class="product-title">{{ product.name }}</h1>
+        
+        <div class="product-meta">
+          <span class="sku">SKU: {{ product.sku }}</span>
+          <span class="rating">
+            <mat-icon *ngFor="let star of [1,2,3,4,5]" 
+                     [class.filled]="star <= product.rating">
+              {{ star <= product.rating ? 'star' : 'star_border' }}
+            </mat-icon>
+            <span class="rating-count">({{ product.reviewCount }} reseñas)</span>
+          </span>
+          <span class="category">{{ product.category?.name }}</span>
+        </div>
+      </div>
+
+      <!-- Precios -->
+      <div class="product-pricing">
+        <div class="current-price" [class.has-discount]="hasDiscount()">
+          <span class="price">{{ getDiscountedPrice() | currency:'USD':'symbol':'1.2-2' }}</span>
+          
+          <span class="original-price" *ngIf="hasDiscount()">
+            {{ product.price | currency:'USD':'symbol':'1.2-2' }}
+          </span>
+          
+          <span class="savings" *ngIf="hasDiscount()">
+            Ahorras {{ getSavings() | currency:'USD':'symbol':'1.2-2' }}
+          </span>
+        </div>
+        
+        <div class="tax-info">Precio IVA incluido</div>
+      </div>
+
+      <!-- Stock -->
+      <div class="stock-info">
+        <mat-icon [class.in-stock]="!isOutOfStock()" [class.out-of-stock]="isOutOfStock()">
+          {{ isOutOfStock() ? 'block' : 'check_circle' }}
+        </mat-icon>
+        
+        <span *ngIf="isOutOfStock()" class="stock-status out-of-stock">
+          Producto agotado
+        </span>
+        
+        <span *ngIf="!isOutOfStock() && isLowStock()" class="stock-status low-stock">
+          ¡Últimas {{ product.stock }} unidades!
+        </span>
+        
+        <span *ngIf="!isOutOfStock() && !isLowStock()" class="stock-status in-stock">
+          {{ product.stock }} unidades disponibles
+        </span>
+      </div>
+
+      <!-- Descripción -->
+      <div class="product-description">
+        <h3>Descripción</h3>
+        <p>{{ product.description }}</p>
+        
+        <div class="features" *ngIf="product.features">
+          <h4>Características principales:</h4>
+          <ul>
+            <li *ngFor="let feature of product.features">{{ feature }}</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Especificaciones -->
+      <div class="product-specs" *ngIf="product.specifications">
+        <h3>Especificaciones técnicas</h3>
+        <div class="specs-grid">
+          <div class="spec-item" *ngFor="let spec of product.specifications | keyvalue">
+            <span class="spec-label">{{ spec.key }}:</span>
+            <span class="spec-value">{{ spec.value }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulario de compra -->
+      <div class="purchase-form" *ngIf="showAddToCart">
+        <form [formGroup]="quantityForm" class="quantity-form">
+          <div class="quantity-selector">
+            <label for="quantity">Cantidad:</label>
+            <div class="quantity-controls">
+              <button type="button" class="qty-btn minus" (click)="changeQuantity(-1)" [disabled]="quantityForm.get('quantity')?.value <= 1">
+                <mat-icon>remove</mat-icon>
+              </button>
+              
+              <input 
+                type="number" 
+                id="quantity"
+                formControlName="quantity"
+                min="1"
+                [max]="maxQuantity"
+                class="quantity-input"
+                (change)="quantityForm.get('quantity')?.updateValueAndValidity()">
+              
+              <button type="button" class="qty-btn plus" (click)="changeQuantity(1)" [disabled]="quantityForm.get('quantity')?.value >= maxQuantity">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+            
+            <div class="quantity-errors" *ngIf="quantityForm.get('quantity')?.invalid && quantityForm.get('quantity')?.touched">
+              <small class="error" *ngIf="quantityForm.get('quantity')?.errors?.['min']">
+                Mínimo 1 unidad
+              </small>
+              <small class="error" *ngIf="quantityForm.get('quantity')?.errors?.['max']">
+                Máximo {{ maxQuantity }} unidades
+              </small>
+            </div>
+          </div>
+
+          <!-- Botones de acción -->
+          <div class="action-buttons">
+            <button 
+              mat-raised-button 
+              color="primary" 
+              class="add-to-cart-btn"
+              [disabled]="isOutOfStock() || quantityForm.invalid || isLoading"
+              (click)="addToCart()">
+              
+              <span *ngIf="!isLoading">
+                <mat-icon>shopping_cart</mat-icon>
+                {{ isOutOfStock() ? 'Agotado' : 'Agregar al carrito' }}
+              </span>
+              
+              <span *ngIf="isLoading">
+                <mat-spinner diameter="20"></mat-spinner>
+                Agregando...
+              </span>
+            </button>
+
+            <button 
+              mat-raised-button 
+              color="accent" 
+              class="buy-now-btn"
+              [disabled]="isOutOfStock() || quantityForm.invalid || isLoading"
+              (click)="buyNow()">
+              
+              <mat-icon>flash_on</mat-icon>
+              Comprar ahora
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Información adicional -->
+      <div class="additional-info">
+        <div class="info-item">
+          <mat-icon>local_shipping</mat-icon>
+          <div class="info-content">
+            <strong>Envío gratis</strong>
+            <small>En pedidos superiores a $50</small>
+          </div>
+        </div>
+        
+        <div class="info-item">
+          <mat-icon>assignment_return</mat-icon>
+          <div class="info-content">
+            <strong>Devoluciones gratis</strong>
+            <small>30 días para cambiar de opinión</small>
+          </div>
+        </div>
+        
+        <div class="info-item">
+          <mat-icon>security</mat-icon>
+          <div class="info-content">
+            <strong>Pago seguro</strong>
+            <small>Protegido por SSL</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

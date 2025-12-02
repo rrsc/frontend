@@ -1,15 +1,51 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common'; // <- Importar CommonModule
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CartService } from '../services/cart.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { NotificationService } from '../../../core/services/notification.service';
-import { PaymentMethod } from '../../../core/models/cart.model';
+import { RouterModule } from '@angular/router';
+
+// Angular Material Modules
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
+import { CartService } from '../../services/cart.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { NotificationService } from '../../../../core/services/notification.service';
+import { PaymentMethod } from '../../../../core/models/cart.model';
+import { StoreLayoutComponent } from '../../layouts/store-layout/store-layout.component';
 
 @Component({
   selector: 'app-checkout-page',
   templateUrl: './checkout-page.component.html',
-  styleUrls: ['./checkout-page.component.scss']
+  styleUrls: ['./checkout-page.component.scss'],
+  standalone: true, // <- Si es standalone
+  imports: [
+    CommonModule, // <- ¡IMPORTANTE! Para CurrencyPipe
+    ReactiveFormsModule,
+    RouterModule,
+    
+    // Angular Material
+    MatButtonModule,
+    MatCardModule,
+    MatCheckboxModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    MatRadioModule,
+    MatSelectModule,
+    MatDividerModule,
+    MatProgressSpinnerModule,
+    
+    StoreLayoutComponent
+  ]
 })
 export class CheckoutPageComponent implements OnInit {
   checkoutForm: FormGroup;

@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
-import { ApiService } from '../../core/services/api.service';
-import { NotificationService } from '../../core/services/notification.service';
-import { Cart, CartItem } from '../../core/models/cart.model';
+import { Cart, CartItem } from '../../../core/models/cart.model';
+import { Product } from '../../../core/models/product.model';
 
 @Injectable({
   providedIn: 'root'
@@ -12,102 +10,143 @@ export class CartService {
   private cartSubject = new BehaviorSubject<Cart | null>(null);
   cart$ = this.cartSubject.asObservable();
 
-  constructor(
-    private apiService: ApiService,
-    private notificationService: NotificationService
-  ) {
-    this.loadCart();
+  constructor() {
+    // Cargar carrito desde localStorage
+    this.loadCartFromStorage();
   }
 
-  private loadCart(): void {
-    this.apiService.getCart().subscribe({
-      next: (cart) => {
-        this.cartSubject.next(cart);
-      },
-      error: () => {
-        this.cartSubject.next(null);
-      }
-    });
-  }
-
+  // Obtener carrito actual
   getCart(): Cart | null {
     return this.cartSubject.value;
   }
 
-  addToCart(item: { productId: string; quantity: number }): Observable<any> {
-    return this.apiService.addToCart(item).pipe(
-      tap((cart) => {
-        this.cartSubject.next(cart);
-        this.notificationService.showSuccess('Producto añadido al carrito');
-      }),
-      catchError((error) => {
-        this.notificationService.showError('Error al añadir al carrito');
-        throw error;
-      })
-    );
+  // Obtener carrito como observable
+  getCartObservable(): Observable<Cart | null> {
+    return this.cart$;
   }
 
-  updateQuantity(productId: string, quantity: number): Observable<any> {
-    if (quantity <= 0) {
-      return this.removeFromCart(productId);
+  // Agregar producto al carrito
+  addToCart(productId: string, quantity: number = 1): Observable<Cart> {
+    const currentCart = this.getCart() || this.createNewCart();
+    
+    // Buscar si el producto ya está en el carrito
+    const existingItem = currentCart.items.find(item => item.productId === productId);
+    
+    if (existingItem) {
+      existingItem.quantity += quantity;
+    } else {
+      const newItem: CartItem = {
+        id: this.generateId(),
+        cartId: currentCart.id,
+        productId: productId,
+        quantity: quantity,
+        price: 0, // Este precio debería venir del producto
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      currentCart.items.push(newItem);
     }
+    
+    this.updateCart(currentCart);
+    return of(currentCart);
+  }
 
-    return this.apiService.updateCartItem(productId, quantity).pipe(
-      tap((cart) => {
+  // Actualizar cantidad de un item
+  updateCartItem(itemId: string, quantity: number): Observable<Cart> {
+    const currentCart = this.getCart();
+    if (!currentCart) {
+      throw new Error('No hay carrito');
+    }
+    
+    const item = currentCart.items.find(item => item.id === itemId);
+    if (item) {
+      if (quantity <= 0) {
+        return this.removeFromCart(itemId);
+      }
+      item.quantity = quantity;
+      item.updatedAt = new Date();
+      this.updateCart(currentCart);
+    }
+    
+    return of(currentCart);
+  }
+
+  // Eliminar item del carrito
+  removeFromCart(itemId: string): Observable<Cart> {
+    const currentCart = this.getCart();
+    if (!currentCart) {
+      throw new Error('No hay carrito');
+    }
+    
+    currentCart.items = currentCart.items.filter(item => item.id !== itemId);
+    this.updateCart(currentCart);
+    return of(currentCart);
+  }
+
+  // Vaciar carrito
+  clearCart(): Observable<Cart> {
+    const currentCart = this.getCart();
+    if (!currentCart) {
+      throw new Error('No hay carrito');
+    }
+    
+    currentCart.items = [];
+    this.updateCart(currentCart);
+    return of(currentCart);
+  }
+
+  // Calcular total del carrito
+  calculateTotal(cart: Cart): number {
+    return cart.items.reduce((total, item) => {
+      return total + (item.price * item.quantity);
+    }, 0);
+  }
+
+  // Métodos privados
+  private createNewCart(): Cart {
+    return {
+      id: this.generateId(),
+      userId: 'current-user-id', // En una app real, esto vendría del auth
+      items: [],
+      total: 0,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+
+  private updateCart(cart: Cart): void {
+    cart.total = this.calculateTotal(cart);
+    cart.updatedAt = new Date();
+    this.cartSubject.next(cart);
+    this.saveCartToStorage(cart);
+  }
+
+  private loadCartFromStorage(): void {
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      try {
+        const cart = JSON.parse(savedCart);
+        // Convertir strings de fecha a objetos Date
+        cart.createdAt = new Date(cart.createdAt);
+        cart.updatedAt = new Date(cart.updatedAt);
+        cart.items = cart.items.map((item: any) => ({
+          ...item,
+          createdAt: new Date(item.createdAt),
+          updatedAt: new Date(item.updatedAt)
+        }));
         this.cartSubject.next(cart);
-        this.notificationService.showSuccess('Carrito actualizado');
-      }),
-      catchError((error) => {
-        this.notificationService.showError('Error al actualizar carrito');
-        throw error;
-      })
-    );
+      } catch (error) {
+        console.error('Error loading cart from storage:', error);
+        localStorage.removeItem('cart');
+      }
+    }
   }
 
-  removeFromCart(productId: string): Observable<any> {
-    return this.apiService.removeFromCart(productId).pipe(
-      tap((cart) => {
-        this.cartSubject.next(cart);
-        this.notificationService.showSuccess('Producto eliminado del carrito');
-      }),
-      catchError((error) => {
-        this.notificationService.showError('Error al eliminar del carrito');
-        throw error;
-      })
-    );
+  private saveCartToStorage(cart: Cart): void {
+    localStorage.setItem('cart', JSON.stringify(cart));
   }
 
-  clearCart(): Observable<any> {
-    return this.apiService.clearCart().pipe(
-      tap(() => {
-        this.cartSubject.next(null);
-        this.notificationService.showSuccess('Carrito vaciado');
-      }),
-      catchError((error) => {
-        this.notificationService.showError('Error al vaciar carrito');
-        throw error;
-      })
-    );
-  }
-
-  checkout(checkoutData: any): Observable<any> {
-    return this.apiService.checkout(checkoutData).pipe(
-      tap((sale) => {
-        this.cartSubject.next(null);
-        this.notificationService.showSuccess('Compra realizada exitosamente');
-      }),
-      catchError((error) => {
-        this.notificationService.showError('Error al procesar la compra');
-        throw error;
-      })
-    );
-  }
-
-  getItemCount(): number {
-    return this.cartSubject.value?.itemCount || 0;
-  }
-
-  getTotal(): number {
-    return this.cartSubject.value?.total || 0;
+  private generateId(): string {
+    return Math.random().toString(36).substr(2, 9);
   }
 }

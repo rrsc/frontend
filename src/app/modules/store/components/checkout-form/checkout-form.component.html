@@ -1,0 +1,403 @@
+<div class="checkout-form-container">
+  <!-- Estado de carga -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando información del carrito...</p>
+  </div>
+
+  <form [formGroup]="checkoutForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
+    <div class="checkout-steps">
+      <!-- Paso 1: Información de contacto -->
+      <mat-card class="checkout-step">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>contact_mail</mat-icon>
+            Información de contacto
+          </mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div formGroupName="contact" class="form-section">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Email</mat-label>
+              <input matInput formControlName="email" type="email" placeholder="tu@email.com">
+              <mat-icon matPrefix>email</mat-icon>
+              <mat-error *ngIf="contactGroup?.get('email')?.invalid">
+                {{ contactGroup?.get('email')?.hasError('required') ? 'Email requerido' : 'Email inválido' }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Teléfono</mat-label>
+              <input matInput formControlName="phone" type="tel" placeholder="+1 234 567 8900">
+              <mat-icon matPrefix>phone</mat-icon>
+              <mat-error *ngIf="contactGroup?.get('phone')?.invalid">
+                {{ contactGroup?.get('phone')?.hasError('required') ? 'Teléfono requerido' : 'Teléfono inválido' }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-checkbox formControlName="newsletter" color="primary">
+              Quiero recibir ofertas y novedades por email
+            </mat-checkbox>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Paso 2: Dirección de envío -->
+      <mat-card class="checkout-step">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>local_shipping</mat-icon>
+            Dirección de envío
+          </mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div formGroupName="shipping" class="form-section">
+            <div class="row">
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Nombre</mat-label>
+                <input matInput formControlName="firstName" placeholder="Ej: Juan">
+                <mat-error *ngIf="shippingGroup?.get('firstName')?.invalid">
+                  Nombre requerido (mínimo 2 caracteres)
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Apellido</mat-label>
+                <input matInput formControlName="lastName" placeholder="Ej: Pérez">
+                <mat-error *ngIf="shippingGroup?.get('lastName')?.invalid">
+                  Apellido requerido (mínimo 2 caracteres)
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Dirección</mat-label>
+              <input matInput formControlName="address" placeholder="Calle, número, departamento">
+              <mat-icon matPrefix>home</mat-icon>
+              <mat-error *ngIf="shippingGroup?.get('address')?.invalid">
+                Dirección requerida
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Apartamento, suite, etc. (opcional)</mat-label>
+              <input matInput formControlName="apartment" placeholder="Apto 4B">
+              <mat-icon matPrefix>meeting_room</mat-icon>
+            </mat-form-field>
+
+            <div class="row">
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Ciudad</mat-label>
+                <input matInput formControlName="city" placeholder="Ej: Madrid">
+                <mat-error *ngIf="shippingGroup?.get('city')?.invalid">
+                  Ciudad requerida
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Estado/Provincia</mat-label>
+                <input matInput formControlName="state" placeholder="Ej: Madrid">
+                <mat-error *ngIf="shippingGroup?.get('state')?.invalid">
+                  Estado requerido
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="row">
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Código Postal</mat-label>
+                <input matInput formControlName="postalCode" placeholder="Ej: 28001">
+                <mat-error *ngIf="shippingGroup?.get('postalCode')?.invalid">
+                  Código postal requerido (5 dígitos)
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>País</mat-label>
+                <input matInput formControlName="country" placeholder="Ej: España">
+                <mat-error *ngIf="shippingGroup?.get('country')?.invalid">
+                  País requerido
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Métodos de envío -->
+            <div class="shipping-methods">
+              <h4>Método de envío</h4>
+              <div class="methods-grid">
+                <mat-radio-group formControlName="shippingMethod" class="methods-radio-group">
+                  <mat-radio-button *ngFor="let method of shippingMethods" 
+                                   [value]="method.id" 
+                                   class="shipping-method">
+                    <div class="method-content">
+                      <div class="method-info">
+                        <strong>{{ method.name }}</strong>
+                        <small>{{ method.delivery }}</small>
+                      </div>
+                      <span class="method-price">{{ method.price | currency:'USD':'symbol':'1.2-2' }}</span>
+                    </div>
+                  </mat-radio-button>
+                </mat-radio-group>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Paso 3: Dirección de facturación -->
+      <mat-card class="checkout-step">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>receipt</mat-icon>
+            Dirección de facturación
+          </mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div formGroupName="billing" class="form-section">
+            <mat-checkbox formControlName="sameAsShipping" color="primary">
+              Usar la misma dirección de envío para facturación
+            </mat-checkbox>
+
+            <div *ngIf="!billingGroup?.get('sameAsShipping')?.value" class="billing-fields">
+              <div class="row">
+                <mat-form-field appearance="outline" class="half-width">
+                  <mat-label>Nombre</mat-label>
+                  <input matInput formControlName="firstName" placeholder="Ej: Juan">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="half-width">
+                  <mat-label>Apellido</mat-label>
+                  <input matInput formControlName="lastName" placeholder="Ej: Pérez">
+                </mat-form-field>
+              </div>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Dirección</mat-label>
+                <input matInput formControlName="address" placeholder="Calle, número, departamento">
+                <mat-icon matPrefix>home</mat-icon>
+              </mat-form-field>
+
+              <div class="row">
+                <mat-form-field appearance="outline" class="half-width">
+                  <mat-label>Ciudad</mat-label>
+                  <input matInput formControlName="city" placeholder="Ej: Madrid">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="half-width">
+                  <mat-label>Estado/Provincia</mat-label>
+                  <input matInput formControlName="state" placeholder="Ej: Madrid">
+                </mat-form-field>
+              </div>
+
+              <div class="row">
+                <mat-form-field appearance="outline" class="half-width">
+                  <mat-label>Código Postal</mat-label>
+                  <input matInput formControlName="postalCode" placeholder="Ej: 28001">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="half-width">
+                  <mat-label>País</mat-label>
+                  <input matInput formControlName="country" placeholder="Ej: España">
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Paso 4: Información de pago -->
+      <mat-card class="checkout-step">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>payment</mat-icon>
+            Información de pago
+          </mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div formGroupName="payment" class="form-section">
+            <!-- Métodos de pago -->
+            <div class="payment-methods">
+              <h4>Método de pago</h4>
+              <mat-radio-group formControlName="method" class="payment-radio-group">
+                <div class="methods-grid">
+                  <mat-radio-button *ngFor="let method of paymentMethods" 
+                                   [value]="method.id" 
+                                   class="payment-method">
+                    <mat-icon>{{ method.icon }}</mat-icon>
+                    {{ method.name }}
+                  </mat-radio-button>
+                </div>
+              </mat-radio-group>
+            </div>
+
+            <!-- Tarjeta de crédito (mostrar solo si seleccionado) -->
+            <div *ngIf="paymentGroup?.get('method')?.value === 'credit_card' || paymentGroup?.get('method')?.value === 'debit_card'" 
+                 class="card-details">
+              <div class="row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Número de tarjeta</mat-label>
+                  <input matInput formControlName="cardNumber" placeholder="1234 5678 9012 3456">
+                  <mat-icon matPrefix>credit_card</mat-icon>
+                  <mat-error *ngIf="paymentGroup?.get('cardNumber')?.invalid">
+                    Número de tarjeta inválido (16 dígitos)
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Nombre en la tarjeta</mat-label>
+                  <input matInput formControlName="cardHolder" placeholder="JUAN PEREZ">
+                  <mat-error *ngIf="paymentGroup?.get('cardHolder')?.invalid">
+                    Nombre requerido
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="row">
+                <mat-form-field appearance="outline" class="third-width">
+                  <mat-label>Mes</mat-label>
+                  <input matInput formControlName="expiryMonth" placeholder="MM" maxlength="2">
+                  <mat-error *ngIf="paymentGroup?.get('expiryMonth')?.invalid">
+                    Mes inválido (01-12)
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="third-width">
+                  <mat-label>Año</mat-label>
+                  <input matInput formControlName="expiryYear" placeholder="YYYY" maxlength="4">
+                  <mat-error *ngIf="paymentGroup?.get('expiryYear')?.invalid">
+                    Año inválido
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="third-width">
+                  <mat-label>CVV</mat-label>
+                  <input matInput formControlName="cvv" placeholder="123" type="password" maxlength="4">
+                  <mat-icon matPrefix>lock</mat-icon>
+                  <mat-error *ngIf="paymentGroup?.get('cvv')?.invalid">
+                    CVV inválido (3-4 dígitos)
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <mat-checkbox formControlName="saveCard" color="primary">
+                Guardar esta tarjeta para futuras compras
+              </mat-checkbox>
+            </div>
+
+            <!-- PayPal info -->
+            <div *ngIf="paymentGroup?.get('method')?.value === 'paypal'" class="paypal-info">
+              <div class="paypal-message">
+                <mat-icon>payments</mat-icon>
+                <p>Serás redirigido a PayPal para completar el pago de forma segura.</p>
+              </div>
+            </div>
+
+            <!-- Pago en efectivo -->
+            <div *ngIf="paymentGroup?.get('method')?.value === 'cash'" class="cash-info">
+              <div class="cash-message">
+                <mat-icon>attach_money</mat-icon>
+                <p>Paga cuando recibas tu pedido. Se aplica un cargo adicional de $2.99.</p>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Resumen del pedido -->
+      <mat-card class="order-summary">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>receipt_long</mat-icon>
+            Resumen del pedido
+          </mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="summary-content">
+            <!-- Items -->
+            <div class="summary-items" *ngIf="cart?.items">
+              <div class="summary-item" *ngFor="let item of cart.items">
+                <span class="item-name">{{ item.product.name }} x{{ item.quantity }}</span>
+                <span class="item-price">{{ (item.product.price * item.quantity) | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+            </div>
+
+            <!-- Totales -->
+            <div class="summary-totals">
+              <div class="total-row">
+                <span>Subtotal</span>
+                <span>{{ getSubtotal() | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+              
+              <div class="total-row">
+                <span>Envío ({{ getSelectedShippingMethod().name }})</span>
+                <span>{{ getSelectedShippingMethod().price | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+              
+              <div class="total-row">
+                <span>IVA (16%)</span>
+                <span>{{ getSubtotal() * 0.16 | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+              
+              <div class="total-row grand-total">
+                <span>Total</span>
+                <span>{{ getTotal() | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+            </div>
+
+            <!-- Términos y condiciones -->
+            <div class="terms-section">
+              <mat-checkbox formControlName="terms" color="primary">
+                Acepto los <a href="/terms" target="_blank">términos y condiciones</a> y la <a href="/privacy" target="_blank">política de privacidad</a>
+              </mat-checkbox>
+              <mat-error *ngIf="terms?.invalid && terms?.touched" class="terms-error">
+                Debes aceptar los términos y condiciones
+              </mat-error>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="checkout-actions">
+              <button mat-button type="button" (click)="goBack()">
+                <mat-icon>arrow_back</mat-icon>
+                Volver al carrito
+              </button>
+              
+              <button mat-raised-button color="primary" type="submit" [disabled]="isSubmitting || checkoutForm.invalid">
+                <span *ngIf="!isSubmitting">
+                  <mat-icon>lock</mat-icon>
+                  Completar pedido
+                </span>
+                <span *ngIf="isSubmitting">
+                  <mat-spinner diameter="20"></mat-spinner>
+                  Procesando...
+                </span>
+              </button>
+            </div>
+
+            <!-- Garantías -->
+            <div class="guarantees">
+              <div class="guarantee">
+                <mat-icon>verified_user</mat-icon>
+                <span>Pago 100% seguro</span>
+              </div>
+              <div class="guarantee">
+                <mat-icon>assignment_return</mat-icon>
+                <span>Devolución en 30 días</span>
+              </div>
+              <div class="guarantee">
+                <mat-icon>support_agent</mat-icon>
+                <span>Soporte 24/7</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </form>
+</div>

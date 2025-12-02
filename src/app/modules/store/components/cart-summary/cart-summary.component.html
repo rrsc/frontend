@@ -1,0 +1,139 @@
+<div class="cart-summary-container">
+  <!-- Estado de carga -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Actualizando carrito...</p>
+  </div>
+
+  <!-- Carrito vacío -->
+  <div class="empty-cart" *ngIf="isEmpty() && !isLoading">
+    <mat-icon class="empty-icon">shopping_cart</mat-icon>
+    <h3>Tu carrito está vacío</h3>
+    <p>Añade algunos productos para comenzar</p>
+
+    <button mat-raised-button color="primary" (click)="onContinueShopping()" *ngIf="showContinueShopping">
+      <mat-icon>storefront</mat-icon>
+      Ir a la tienda
+    </button>
+  </div>
+
+  <!-- Carrito con items -->
+  <div class="cart-content" *ngIf="!isEmpty() && !isLoading">
+    <!-- Header -->
+    <div class="cart-header">
+      <h2>
+        <mat-icon>shopping_cart</mat-icon>
+        Resumen del carrito
+      </h2>
+
+      <button mat-button color="warn" (click)="clearCart()" [disabled]="isLoading">
+        <mat-icon>delete_sweep</mat-icon>
+        Vaciar carrito
+      </button>
+    </div>
+
+    <!-- Items del carrito -->
+    <div class="cart-items">
+      <div class="cart-item" *ngFor="let item of cart?.items">
+        <div class="item-image">
+          <img [src]="getProductImage(item)" [alt]="getProductName(item)">
+        </div>
+
+        <div class="item-details">
+          <h4 class="item-title">{{ getProductName(item) }}</h4>
+          <p class="item-sku">SKU: {{ getProductSKU(item) }}</p>
+
+          <div class="item-pricing">
+            <span class="item-price">{{ item.price | currency:'USD':'symbol':'1.2-2' }}</span>
+            <span class="item-total">x {{ item.quantity }} = {{ (item.price * item.quantity) |
+              currency:'USD':'symbol':'1.2-2' }}</span>
+          </div>
+
+          <div class="item-discount" *ngIf="getProductDiscount(item) > 0">
+            <span class="discount-badge">-{{ getProductDiscount(item) }}%</span>
+            <span class="discount-amount">
+              Ahorro: {{ (item.price * (getProductDiscount(item) / 100) * item.quantity) |
+              currency:'USD':'symbol':'1.2-2' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="item-actions">
+          <div class="quantity-control">
+            <button mat-icon-button (click)="updateQuantity(item.id, item.quantity - 1)" [disabled]="isLoading">
+              <mat-icon>remove</mat-icon>
+            </button>
+
+            <span class="quantity-display">{{ item.quantity }}</span>
+
+            <button mat-icon-button (click)="updateQuantity(item.id, item.quantity + 1)" [disabled]="isLoading">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+
+          <button mat-icon-button color="warn" (click)="removeItem(item.id)" [disabled]="isLoading">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resumen de precios -->
+    <div class="price-summary">
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <span class="amount">{{ getSubtotal() | currency:'USD':'symbol':'1.2-2' }}</span>
+      </div>
+
+      <div class="summary-row discount" *ngIf="hasDiscount()">
+        <span>Descuento</span>
+        <span class="amount">-{{ getDiscount() | currency:'USD':'symbol':'1.2-2' }}</span>
+      </div>
+
+      <div class="summary-row">
+        <span>Total sin IVA</span>
+        <span class="amount">{{ getTotal() | currency:'USD':'symbol':'1.2-2' }}</span>
+      </div>
+
+      <div class="summary-row tax">
+        <span>IVA (16%)</span>
+        <span class="amount">{{ getTax() | currency:'USD':'symbol':'1.2-2' }}</span>
+      </div>
+
+      <div class="summary-row total">
+        <span>Total a pagar</span>
+        <span class="amount">{{ getTotalWithTax() | currency:'USD':'symbol':'1.2-2' }}</span>
+      </div>
+    </div>
+
+    <!-- Promo code -->
+    <div class="promo-code">
+      <mat-form-field appearance="outline" class="promo-field">
+        <mat-label>Código promocional</mat-label>
+        <input matInput placeholder="Ingresa tu código">
+        <button matSuffix mat-raised-button color="accent">
+          Aplicar
+        </button>
+      </mat-form-field>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="cart-actions">
+      <button mat-button (click)="onContinueShopping()" *ngIf="showContinueShopping">
+        <mat-icon>arrow_back</mat-icon>
+        Continuar comprando
+      </button>
+
+      <button mat-raised-button color="primary" (click)="onProceedToCheckout()" *ngIf="showCheckoutButton">
+        <mat-icon>shopping_bag</mat-icon>
+        Proceder al pago
+      </button>
+    </div>
+
+    <!-- Información adicional -->
+    <div class="additional-info">
+      <mat-icon>verified_user</mat-icon>
+      <p>Compra 100% segura. Tus datos están protegidos.</p>
+    </div>
+  </div>
+</div>

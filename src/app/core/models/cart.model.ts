@@ -1,20 +1,25 @@
-export interface CartItem {
-  productId: string;
-  name: string;
-  price: number;
-  quantity: number;
-  imageUrl?: string;
-  category: ProductCategory;
-}
+import { Product, ProductCategory } from "./product.model";
 
 export interface Cart {
   id: string;
   userId: string;
   items: CartItem[];
   total: number;
-  itemCount: number;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface CartItem {
+  id: string;
+  cartId: string;
+  productId: string;
+  quantity: number;
+  price: number; // Precio al momento de agregar al carrito
+  createdAt: Date;
+  updatedAt: Date;
+  
+  // Relaciones (populadas desde el backend)
+  product?: Product;
 }
 
 export interface CheckoutRequest {

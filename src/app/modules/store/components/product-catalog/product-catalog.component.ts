@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
-import { BaseProduct, ProductCategory } from '../../../core/models/product.model';
-import { CartService } from '../../../services/cart.service';
+import { BaseProduct, ProductCategory } from '../../../../core/models/product.model';
+import { CartService } from '../../services/cart.service';
 
 @Component({
   selector: 'app-product-catalog',
@@ -16,9 +16,9 @@ export class ProductCatalogComponent implements OnInit {
   @Input() showFilters = true;
   @Input() title = 'Catálogo de Productos';
   
-  @Output() pageChanged = new EventEmitter<PageEvent>();
-  @Output() categoryFilter = new EventEmitter<string>();
-  @Output() search = new EventEmitter<string>();
+  @Output() pageChanged = new EventEmitter<PageEvent>(); // <- PageEvent
+  @Output() categoryFilter = new EventEmitter<string>(); // <- string
+  @Output() search = new EventEmitter<string>(); // <- string
 
   categories = [
     { value: 'all', label: 'Todos los productos' },

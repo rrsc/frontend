@@ -1,13 +1,28 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { PageEvent } from '@angular/material/paginator';
-import { ApiService } from '../../core/services/api.service';
-import { BaseProduct, ProductCategory } from '../../core/models/product.model';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
+import { ApiService } from '../../../../core/services/api.service';
+import { BaseProduct, ProductCategory } from '../../../../core/models/product.model';
+import { StoreLayoutComponent } from '../../layouts/store-layout/store-layout.component';
+import { ProductCatalogComponent } from '../../components/product-catalog/product-catalog.component'; // <- IMPORTAR
 
 @Component({
   selector: 'app-catalog-page',
   templateUrl: './catalog-page.component.html',
-  styleUrls: ['./catalog-page.component.scss']
+  styleUrls: ['./catalog-page.component.scss'],
+  standalone: true, // <- Si es standalone
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatPaginatorModule,
+    MatProgressSpinnerModule,
+    StoreLayoutComponent,
+    ProductCatalogComponent // <- ¡IMPORTANTE! Agregar aquí
+  ]
 })
 export class CatalogPageComponent implements OnInit {
   products: BaseProduct[] = [];
@@ -16,7 +31,6 @@ export class CatalogPageComponent implements OnInit {
   currentPage = 0;
   category: string | null = null;
   loading = true;
-  
   pageTitle = 'Catálogo de Productos';
 
   constructor(
@@ -77,11 +91,10 @@ export class CatalogPageComponent implements OnInit {
     });
   }
 
-  onPageChange(event: PageEvent): void {
+  onPageChange(event: PageEvent): void { // <- Recibe PageEvent
     this.currentPage = event.pageIndex;
     this.pageSize = event.pageSize;
     
-    // Update URL without reloading
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { page: this.currentPage },
@@ -91,7 +104,7 @@ export class CatalogPageComponent implements OnInit {
     this.loadProducts();
   }
 
-  onCategoryFilter(category: string): void {
+  onCategoryFilter(category: string): void { // <- Recibe string
     if (category === 'all') {
       this.router.navigate(['/store']);
     } else {
@@ -99,9 +112,10 @@ export class CatalogPageComponent implements OnInit {
     }
   }
 
-  onSearch(query: string): void {
+  onSearch(query: string): void { // <- Recibe string
     // Implement search functionality
     console.log('Search:', query);
+    // Puedes agregar lógica de búsqueda aquí
   }
 
   viewProductDetails(product: BaseProduct): void {

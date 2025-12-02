@@ -5,7 +5,6 @@ import { map } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { TokenService } from './token.service';
 import { User, LoginRequest, LoginResponse, TwoFactorSetup } from '../models/user.model';
-import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'

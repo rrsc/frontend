@@ -50,7 +50,6 @@ export function jwtOptionsFactory(tokenService: TokenService) {
     BrowserModule,
     BrowserAnimationsModule,
     HttpClientModule,
-    
     // Third party modules
     JwtModule.forRoot({
       jwtOptionsProvider: {

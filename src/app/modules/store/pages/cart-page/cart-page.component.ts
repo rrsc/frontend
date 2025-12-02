@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { CartService } from '../services/cart.service';
-import { Cart, CartItem } from '../../../core/models/cart.model';
-import { NotificationService } from '../../../core/services/notification.service';
+import { CartService } from '../../services/cart.service';
+import { NotificationService } from '../../../../core/services/notification.service';
+import { Cart, CartItem } from '../../../../core/models/cart.model';
 
 @Component({
   selector: 'app-cart-page',

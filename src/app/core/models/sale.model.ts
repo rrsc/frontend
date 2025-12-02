@@ -1,3 +1,16 @@
+export enum SaleStatus {
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled',
+  REFUNDED = 'refunded'
+}
+
+export enum PaymentMethod {
+  CASH = 'cash',
+  CARD = 'card',
+  TRANSFER = 'transfer'
+}
+
 export interface SaleItem {
   productId: string;
   name: string;
@@ -9,6 +22,11 @@ export interface SaleItem {
 export interface Sale {
   id: string;
   customerId?: string;
+  customer?: {
+    id: string;
+    name: string;
+    email?: string;
+  };
   items: SaleItem[];
   subtotal: number;
   tax: number;
@@ -17,11 +35,5 @@ export interface Sale {
   status: SaleStatus;
   notes?: string;
   createdAt: Date;
-}
-
-export enum SaleStatus {
-  PENDING = 'pending',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled',
-  REFUNDED = 'refunded'
+  updatedAt?: Date;
 }

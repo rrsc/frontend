@@ -1,0 +1,234 @@
+<div class="category-filter-container">
+  <!-- Filtros móviles (toggle) -->
+  <div class="mobile-filter-header" *ngIf="!showAdvancedFilters">
+    <button mat-button (click)="showAdvancedFilters = !showAdvancedFilters" class="filter-toggle">
+      <mat-icon>filter_list</mat-icon>
+      Filtros
+      <span class="filter-count" *ngIf="countActiveFilters() > 0">
+        ({{ countActiveFilters() }})
+      </span>
+    </button>
+    
+    <mat-form-field appearance="outline" class="sort-selector">
+      <mat-label>Ordenar por</mat-label>
+      <mat-select [formControl]="filterForm.get('sortBy')">
+        <mat-option *ngFor="let option of sortOptions" [value]="option.value">
+          {{ option.label }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <!-- Contenedor de filtros -->
+  <div class="filters-wrapper" [class.advanced]="showAdvancedFilters">
+    <!-- Header de filtros avanzados -->
+    <div class="filter-header" *ngIf="showAdvancedFilters">
+      <h3>
+        <mat-icon>filter_list</mat-icon>
+        Filtros
+      </h3>
+      
+      <div class="header-actions">
+        <span class="active-filters" *ngIf="countActiveFilters() > 0">
+          {{ countActiveFilters() }} filtro(s) activo(s)
+        </span>
+        
+        <button mat-button color="warn" (click)="clearAllFilters()" *ngIf="hasActiveFilters()">
+          <mat-icon>clear_all</mat-icon>
+          Limpiar todo
+        </button>
+        
+        <button mat-icon-button (click)="showAdvancedFilters = false" class="close-filters">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Formulario de filtros -->
+    <form [formGroup]="filterForm" class="filter-form">
+      <!-- Categorías -->
+      <div class="filter-section">
+        <h4 class="section-title">
+          <mat-icon>category</mat-icon>
+          Categorías
+        </h4>
+        
+        <div class="categories-list">
+          <button 
+            mat-button 
+            [class.active]="filterForm.get('category')?.value === ''"
+            (click)="selectCategory('')"
+            class="category-btn">
+            <mat-icon>apps</mat-icon>
+            Todas las categorías
+          </button>
+          
+          <button 
+            *ngFor="let category of categories"
+            mat-button 
+            [class.active]="filterForm.get('category')?.value === category.slug"
+            (click)="selectCategory(category.slug)"
+            class="category-btn">
+            <mat-icon>{{ category.icon || 'folder' }}</mat-icon>
+            {{ category.name }}
+            <span class="category-count">({{ category.productCount || 0 }})</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Rango de precios -->
+      <div class="filter-section">
+        <h4 class="section-title">
+          <mat-icon>attach_money</mat-icon>
+          Rango de precios
+        </h4>
+        
+        <div class="price-range">
+          <div class="price-inputs">
+            <mat-form-field appearance="outline" class="price-input">
+              <mat-label>Mínimo</mat-label>
+              <input matInput type="number" formControlName="priceMin" min="0" [max]="priceMax">
+              <span matPrefix>$</span>
+            </mat-form-field>
+            
+            <span class="price-separator">-</span>
+            
+            <mat-form-field appearance="outline" class="price-input">
+              <mat-label>Máximo</mat-label>
+              <input matInput type="number" formControlName="priceMax" [min]="priceMin" max="5000">
+              <span matPrefix>$</span>
+            </mat-form-field>
+          </div>
+          
+          <mat-slider
+            class="price-slider"
+            [min]="priceMin"
+            [max]="priceMax"
+            [step]="10"
+            [displayWith]="formatPrice"
+            (change)="updatePriceRange()">
+            <input matSliderStartThumb formControlName="priceMin">
+            <input matSliderEndThumb formControlName="priceMax">
+          </mat-slider>
+          
+          <div class="price-display">
+            <span class="current-range">
+              {{ filterForm.get('priceMin')?.value | currency:'USD':'symbol':'1.0-0' }} - 
+              {{ filterForm.get('priceMax')?.value | currency:'USD':'symbol':'1.0-0' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Marcas -->
+      <div class="filter-section">
+        <h4 class="section-title">
+          <mat-icon>branding_watermark</mat-icon>
+          Marcas
+        </h4>
+        
+        <div class="brands-list">
+          <button 
+            *ngFor="let brand of brands"
+            mat-button 
+            [class.active]="filterForm.get('brands')?.value?.includes(brand)"
+            (click)="toggleBrand(brand)"
+            class="brand-btn">
+            <mat-checkbox 
+              [checked]="filterForm.get('brands')?.value?.includes(brand)"
+              color="primary"
+              (click)="$event.stopPropagation()">
+            </mat-checkbox>
+            {{ brand }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Calificación -->
+      <div class="filter-section">
+        <h4 class="section-title">
+          <mat-icon>star</mat-icon>
+          Calificación
+        </h4>
+        
+        <div class="ratings-list">
+          <button 
+            *ngFor="let rating of ratings"
+            mat-button 
+            [class.active]="filterForm.get('rating')?.value === rating"
+            (click)="selectRating(rating)"
+            class="rating-btn">
+            <div class="stars">
+              <mat-icon *ngFor="let star of [1,2,3,4,5]" 
+                       [class.filled]="star <= rating">
+                {{ star <= rating ? 'star' : 'star_border' }}
+              </mat-icon>
+            </div>
+            <span class="rating-text">y más</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Disponibilidad -->
+      <div class="filter-section">
+        <h4 class="section-title">
+          <mat-icon>inventory</mat-icon>
+          Disponibilidad
+        </h4>
+        
+        <div class="availability-list">
+          <div *ngFor="let avail of availabilities" class="availability-item">
+            <mat-checkbox 
+              [checked]="filterForm.get('availability')?.value?.includes(avail.id)"
+              (change)="toggleAvailability(avail.id)"
+              color="primary">
+              {{ avail.label }}
+            </mat-checkbox>
+          </div>
+        </div>
+      </div>
+
+      <!-- Características especiales -->
+      <div class="filter-section">
+        <h4 class="section-title">
+          <mat-icon>featured_play_list</mat-icon>
+          Características
+        </h4>
+        
+        <div class="features-list">
+          <mat-checkbox formControlName="discountOnly" color="primary">
+            Solo con descuento
+          </mat-checkbox>
+          
+          <mat-checkbox formControlName="freeShipping" color="primary">
+            Envío gratis
+          </mat-checkbox>
+        </div>
+      </div>
+
+      <!-- Ordenar por -->
+      <div class="filter-section">
+        <h4 class="section-title">
+          <mat-icon>sort</mat-icon>
+          Ordenar por
+        </h4>
+        
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-select [formControl]="filterForm.get('sortBy')">
+            <mat-option *ngFor="let option of sortOptions" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Botón aplicar filtros (móvil) -->
+      <div class="mobile-actions" *ngIf="showAdvancedFilters">
+        <button mat-raised-button color="primary" class="apply-filters" (click)="showAdvancedFilters = false">
+          <mat-icon>check</mat-icon>
+          Aplicar filtros
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -68,3 +68,43 @@ export interface InventoryHistory {
   reason?: string;
   createdAt: Date;
 }
+
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  images: string[];
+  categoryId: string;
+  stock: number;
+  sku: string;
+  rating: number;
+  reviewCount: number;
+  isFeatured: boolean;
+  isNew: boolean;
+  discount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  
+  // Relaciones (opcionales)
+  category?: Category;
+  specifications?: Record<string, string>;
+  features?: string[];
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  image?: string;
+  icon?: string;
+  productCount?: number;
+  parentId?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  
+  // Relaciones
+  parent?: Category;
+  children?: Category[];
+}

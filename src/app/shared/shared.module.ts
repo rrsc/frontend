@@ -1,4 +1,3 @@
-// src/app/shared/shared.module.ts (actualizado)
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -42,7 +41,8 @@ import { MatRippleModule } from '@angular/material/core';
 import { MatTreeModule } from '@angular/material/tree';
 
 // Charts
-import { NgChartsModule } from 'ng2-charts';
+//import { NgChartsModule } from 'ng2-charts';
+import { BaseChartDirective } from 'ng2-charts';
 
 // Toastr
 import { ToastrModule } from 'ngx-toastr';
@@ -73,7 +73,8 @@ import { SafeUrlPipe } from './pipes/safe-url.pipe';
     SearchBarComponent,
     PaginatorComponent,
     BreadcrumbComponent,
-    
+    BaseChartDirective,
+    SearchBarComponent,
     // Pipes
     CurrencyFormatPipe,
     DateFormatPipe,
@@ -99,7 +100,6 @@ import { SafeUrlPipe } from './pipes/safe-url.pipe';
     MatDividerModule,
     
     // Third party
-    NgChartsModule,
     ToastrModule.forRoot({
       positionClass: 'toast-top-right',
       preventDuplicates: true,
@@ -152,7 +152,6 @@ import { SafeUrlPipe } from './pipes/safe-url.pipe';
     MatTreeModule,
     
     // Third party
-    NgChartsModule,
     NgxSpinnerModule,
     
     // Componentes compartidos

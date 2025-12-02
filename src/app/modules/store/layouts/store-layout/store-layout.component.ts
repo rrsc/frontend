@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
-import { CartService } from '../services/cart.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { CartService } from '../../services/cart.service';
 
 @Component({
   selector: 'app-store-layout',

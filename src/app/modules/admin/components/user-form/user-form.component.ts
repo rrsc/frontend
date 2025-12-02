@@ -1,7 +1,9 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { User, UserCreateDto, UserUpdateDto } from '../../../../core/models/user.model';
+import { User, UserCreateDto, UserUpdateDto, Role } from '../../../../core/models/user.model';
+import { ApiService } from '../../../../core/services/api.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 export interface UserFormData {
   mode: 'create' | 'edit';
@@ -15,151 +17,215 @@ export interface UserFormData {
 })
 export class UserFormComponent implements OnInit {
   userForm: FormGroup;
-  isSubmitting = false;
-  hidePassword = true;
-  roles = ['USER', 'ADMIN', 'MODERATOR'];
+  loading = false;
+  roles: Role[] = [];
+  passwordVisible = false;
+  confirmPasswordVisible = false;
 
   constructor(
     private fb: FormBuilder,
-    private dialogRef: MatDialogRef<UserFormComponent>,
+    private apiService: ApiService,
+    private notificationService: NotificationService,
+    public dialogRef: MatDialogRef<UserFormComponent>,
     @Inject(MAT_DIALOG_DATA) public data: UserFormData
   ) {
-    this.userForm = this.createForm();
+    this.userForm = this.createUserForm();
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
+    this.loadRoles();
+    
     if (this.data.mode === 'edit' && this.data.user) {
       this.patchFormWithUser(this.data.user);
+      
+      // En modo edición, los campos de contraseña no son requeridos
+      this.userForm.get('password')?.clearValidators();
+      this.userForm.get('confirmPassword')?.clearValidators();
+      this.userForm.get('password')?.updateValueAndValidity();
+      this.userForm.get('confirmPassword')?.updateValueAndValidity();
     }
   }
 
-  createForm(): FormGroup {
+  createUserForm(): FormGroup {
     return this.fb.group({
-      firstName: ['', [Validators.required, Validators.minLength(2)]],
-      lastName: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
+      // Información básica
       username: ['', [Validators.required, Validators.minLength(3)]],
-      role: ['USER', Validators.required],
-      phone: ['', Validators.pattern(/^\+?[\d\s-]+$/)],
+      email: ['', [Validators.required, Validators.email]],
+      firstName: [''],
+      lastName: [''],
+      
+      // Contraseña (solo para creación)
+      password: ['', this.data.mode === 'create' ? [Validators.required, Validators.minLength(6)] : []],
+      confirmPassword: ['', this.data.mode === 'create' ? [Validators.required] : []],
+      
+      // Información de contacto
+      phone: [''],
       address: [''],
       city: [''],
+      state: [''],
       country: [''],
       postalCode: [''],
-      active: [true],
       
-      // Solo en creación
-      password: ['', this.data.mode === 'create' ? [
-        Validators.required,
-        Validators.minLength(6),
-        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/)
-      ] : []],
-      confirmPassword: ['', this.data.mode === 'create' ? [Validators.required] : []]
+      // Roles
+      roleIds: [[]],
+      
+      // Estado
+      isActive: [true],
+      isTwoFactorEnabled: [false]
     }, { validators: this.passwordMatchValidator });
   }
 
-  patchFormWithUser(user: User) {
-    this.userForm.patchValue({
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      username: user.username,
-      role: user.role,
-      phone: user.phone || '',
-      address: user.address || '',
-      city: user.city || '',
-      country: user.country || '',
-      postalCode: user.postalCode || '',
-      active: user.active
-    });
-
-    // Deshabilitar email en modo edición
-    this.userForm.get('email')?.disable();
-  }
-
-  passwordMatchValidator(group: FormGroup) {
-    const password = group.get('password')?.value;
-    const confirmPassword = group.get('confirmPassword')?.value;
+  passwordMatchValidator(form: FormGroup) {
+    const password = form.get('password')?.value;
+    const confirmPassword = form.get('confirmPassword')?.value;
     
-    if (group.get('password')?.dirty || group.get('confirmPassword')?.dirty) {
-      return password === confirmPassword ? null : { passwordMismatch: true };
+    if (password !== confirmPassword) {
+      form.get('confirmPassword')?.setErrors({ mismatch: true });
+      return { mismatch: true };
     }
+    
     return null;
   }
 
-  getFormData(): UserCreateDto | UserUpdateDto {
-    const formValue = this.userForm.getRawValue();
-    
-    const baseData = {
-      firstName: formValue.firstName,
-      lastName: formValue.lastName,
-      email: formValue.email,
-      username: formValue.username,
-      role: formValue.role,
-      phone: formValue.phone || undefined,
-      address: formValue.address || undefined,
-      city: formValue.city || undefined,
-      country: formValue.country || undefined,
-      postalCode: formValue.postalCode || undefined,
-      active: formValue.active
-    };
-
-    if (this.data.mode === 'create') {
-      return {
-        ...baseData,
-        password: formValue.password
-      } as UserCreateDto;
-    } else {
-      return baseData as UserUpdateDto;
-    }
+  loadRoles(): void {
+    this.apiService.getRoles().subscribe({
+      next: (response: any) => {
+        this.roles = response.data || response;
+      },
+      error: (error) => {
+        console.error('Error loading roles:', error);
+        this.notificationService.showError('Error al cargar roles');
+      }
+    });
   }
 
-  onSubmit() {
-    if (this.userForm.invalid || this.isSubmitting) {
+  patchFormWithUser(user: User): void {
+    this.userForm.patchValue({
+      username: user.username,
+      email: user.email,
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      phone: user.phone || '',
+      address: user.address || '',
+      city: user.city || '',
+      state: user.state || '',
+      country: user.country || '',
+      postalCode: user.postalCode || '',
+      isActive: user.isActive,
+      isTwoFactorEnabled: user.isTwoFactorEnabled,
+      roleIds: user.roles.map(role => role.id) // Convertir roles a array de IDs
+    });
+  }
+
+  onSubmit(): void {
+    if (this.userForm.invalid) {
+      this.markFormGroupTouched(this.userForm);
+      this.notificationService.showError('Por favor completa los campos requeridos correctamente');
       return;
     }
 
-    this.isSubmitting = true;
+    this.loading = true;
     
-    // Simular llamada API
-    setTimeout(() => {
-      const formData = this.getFormData();
-      this.dialogRef.close(formData);
-      this.isSubmitting = false;
-    }, 1000);
+    const formValue = this.userForm.value;
+    
+    if (this.data.mode === 'create') {
+      this.createUser(formValue);
+    } else {
+      this.updateUser(formValue);
+    }
   }
 
-  onCancel() {
-    this.dialogRef.close();
+  createUser(userData: any): void {
+    const userCreateDto: UserCreateDto = {
+      username: userData.username,
+      email: userData.email,
+      password: userData.password,
+      firstName: userData.firstName || undefined,
+      lastName: userData.lastName || undefined,
+      phone: userData.phone || undefined,
+      address: userData.address || undefined,
+      city: userData.city || undefined,
+      state: userData.state || undefined,
+      country: userData.country || undefined,
+      postalCode: userData.postalCode || undefined,
+      isActive: userData.isActive,
+      roleIds: userData.roleIds
+    };
+
+    this.apiService.createUser(userCreateDto).subscribe({
+      next: (response) => {
+        this.loading = false;
+        this.notificationService.showSuccess('Usuario creado exitosamente');
+        this.dialogRef.close(true);
+      },
+      error: (error) => {
+        this.loading = false;
+        console.error('Error creating user:', error);
+        this.notificationService.showError(
+          error.error?.message || 'Error al crear usuario'
+        );
+      }
+    });
   }
 
-  // Getters para validación
-  get firstName() { return this.userForm.get('firstName'); }
-  get lastName() { return this.userForm.get('lastName'); }
-  get email() { return this.userForm.get('email'); }
+  updateUser(userData: any): void {
+    if (!this.data.user?.id) return;
+    
+    const userUpdateDto: UserUpdateDto = {
+      username: userData.username,
+      email: userData.email,
+      firstName: userData.firstName || undefined,
+      lastName: userData.lastName || undefined,
+      phone: userData.phone || undefined,
+      address: userData.address || undefined,
+      city: userData.city || undefined,
+      state: userData.state || undefined,
+      country: userData.country || undefined,
+      postalCode: userData.postalCode || undefined,
+      isActive: userData.isActive,
+      roleIds: userData.roleIds
+    };
+
+    this.apiService.updateUser(this.data.user.id, userUpdateDto).subscribe({
+      next: (response) => {
+        this.loading = false;
+        this.notificationService.showSuccess('Usuario actualizado exitosamente');
+        this.dialogRef.close(true);
+      },
+      error: (error) => {
+        this.loading = false;
+        console.error('Error updating user:', error);
+        this.notificationService.showError(
+          error.error?.message || 'Error al actualizar usuario'
+        );
+      }
+    });
+  }
+
+  onCancel(): void {
+    this.dialogRef.close(false);
+  }
+
+  private markFormGroupTouched(formGroup: FormGroup): void {
+    Object.values(formGroup.controls).forEach(control => {
+      control.markAsTouched();
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
+      }
+    });
+  }
+
+  getTitle(): string {
+    return this.data.mode === 'create' ? 'Nuevo Usuario' : 'Editar Usuario';
+  }
+
+  getButtonText(): string {
+    return this.data.mode === 'create' ? 'Crear Usuario' : 'Actualizar Usuario';
+  }
+
+  // Getters para acceder fácilmente a los controles del formulario
   get username() { return this.userForm.get('username'); }
+  get email() { return this.userForm.get('email'); }
   get password() { return this.userForm.get('password'); }
   get confirmPassword() { return this.userForm.get('confirmPassword'); }
-  get phone() { return this.userForm.get('phone'); }
-
-  // Mensajes de error
-  getErrorMessage(control: any) {
-    if (control?.hasError('required')) {
-      return 'Este campo es requerido';
-    }
-    if (control?.hasError('email')) {
-      return 'Email no válido';
-    }
-    if (control?.hasError('minlength')) {
-      return `Mínimo ${control.errors?.['minlength'].requiredLength} caracteres`;
-    }
-    if (control?.hasError('pattern')) {
-      if (control === this.password) {
-        return 'La contraseña debe contener mayúsculas, minúsculas y números';
-      }
-      if (control === this.phone) {
-        return 'Número de teléfono no válido';
-      }
-    }
-    return '';
-  }
 }
