@@ -8,7 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiService } from '../../../../core/services/api.service';
 import { BaseProduct, ProductCategory } from '../../../../core/models/product.model';
 import { StoreLayoutComponent } from '../../layouts/store-layout/store-layout.component';
-import { ProductCatalogComponent } from '../../components/product-catalog/product-catalog.component'; // <- IMPORTAR
+import { ProductCatalogComponent } from '../../components/product-catalog/product-catalog.component';
 
 @Component({
   selector: 'app-catalog-page',

@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ApiService } from '../../core/services/api.service';
 import { CartService } from '../../services/cart.service';
-import { NotificationService } from '../../core/services/notification.service';
-import { BaseProduct, Book, Movie, Vinyl, CompactDisc } from '../../core/models/product.model';
+import { BaseProduct, Book, CompactDisc, Movie, Vinyl } from '../../../../core/models/product.model';
+import { ApiService } from '../../../../core/services/api.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-product-page',
