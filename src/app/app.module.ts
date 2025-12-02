@@ -67,7 +67,7 @@ export function jwtOptionsFactory(tokenService: TokenService) {
       closeButton: true
     }),
     NgxSpinnerModule.forRoot({ type: 'ball-scale-multiple' }),
-    
+    JwtModule.forRoot({ /* configuración JWT */ }),
     // App modules
     AppRoutingModule,
     CoreModule,
