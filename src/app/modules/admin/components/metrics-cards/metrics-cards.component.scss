@@ -1,0 +1,115 @@
+.metrics-cards {
+  .cards-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+
+  .metric-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: translateY(-4px);
+    }
+
+    &.primary {
+      border-left: 4px solid #2196f3;
+    }
+
+    &.accent {
+      border-left: 4px solid #ff4081;
+    }
+
+    &.warn {
+      border-left: 4px solid #f44336;
+    }
+
+    .card-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      .card-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &.primary {
+          background: rgba(33, 150, 243, 0.1);
+        }
+
+        &.accent {
+          background: rgba(255, 64, 129, 0.1);
+        }
+
+        &.warn {
+          background: rgba(244, 67, 54, 0.1);
+        }
+
+        mat-icon {
+          font-size: 28px;
+          width: 28px;
+          height: 28px;
+
+          &.primary {
+            color: #2196f3;
+          }
+
+          &.accent {
+            color: #ff4081;
+          }
+
+          &.warn {
+            color: #f44336;
+          }
+        }
+      }
+
+      .card-info {
+        flex: 1;
+
+        .card-title {
+          font-size: 14px;
+          color: #666;
+          margin-bottom: 4px;
+        }
+
+        .card-value {
+          font-size: 24px;
+          font-weight: 600;
+          color: #333;
+        }
+      }
+    }
+
+    .card-trend {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-top: 12px;
+
+      &.positive {
+        color: #4caf50;
+      }
+
+      &.negative {
+        color: #f44336;
+      }
+
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+}

@@ -1,0 +1,100 @@
+/* login-page.component.scss */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 30px;
+  
+  .logo-icon {
+    color: #667eea;
+    margin-right: 10px;
+  }
+  
+  mat-card-header {
+    margin-bottom: 30px;
+    text-align: center;
+    
+    mat-card-title {
+      font-size: 28px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+    
+    mat-card-subtitle {
+      font-size: 16px;
+      color: #666;
+    }
+  }
+  
+  .full-width {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 30px;
+    
+    .forgot-password {
+      color: #667eea;
+      text-decoration: none;
+      font-size: 14px;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+  
+  .two-factor-info {
+    text-align: center;
+    margin-bottom: 30px;
+    
+    .info-icon {
+      font-size: 60px;
+      width: 60px;
+      height: 60px;
+      color: #667eea;
+      margin-bottom: 20px;
+    }
+    
+    p {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+  }
+  
+  .two-factor-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    
+    .verify-button {
+      min-width: 120px;
+    }
+  }
+  
+  .register-section {
+    margin-top: 30px;
+    
+    .register-text {
+      text-align: center;
+      color: #666;
+      margin: 20px 0;
+    }
+  }
+}

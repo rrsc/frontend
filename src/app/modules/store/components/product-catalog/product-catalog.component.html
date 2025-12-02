@@ -1,0 +1,101 @@
+<div class="product-catalog">
+  <!-- Header -->
+  <div class="catalog-header">
+    <div class="header-top flex justify-between align-center mb-4">
+      <h1 class="catalog-title">{{ title }}</h1>
+      <div class="total-products">
+        <span class="text-gray-600">{{ totalProducts }} productos encontrados</span>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div *ngIf="showFilters" class="catalog-filters">
+      <div class="filter-grid grid gap-4">
+        <!-- Search -->
+        <div class="filter-item">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Buscar productos</mat-label>
+            <input 
+              matInput 
+              [(ngModel)]="searchQuery" 
+              placeholder="Nombre, autor, descripción..."
+              (keyup.enter)="onSearch()"
+            >
+            <button 
+              mat-icon-button 
+              matSuffix 
+              (click)="onSearch()"
+              [disabled]="!searchQuery"
+            >
+              <mat-icon>search</mat-icon>
+            </button>
+          </mat-form-field>
+        </div>
+
+        <!-- Category filter -->
+        <div class="filter-item">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Categoría</mat-label>
+            <mat-select [(ngModel)]="selectedCategory" (selectionChange)="onCategoryChange(selectedCategory)">
+              <mat-option *ngFor="let cat of categories" [value]="cat.value">
+                {{ cat.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Sort -->
+        <div class="filter-item">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Ordenar por</mat-label>
+            <mat-select [(ngModel)]="selectedSort" (selectionChange)="onSortChange(selectedSort)">
+              <mat-option *ngFor="let sort of sortOptions" [value]="sort.value">
+                {{ sort.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Products grid -->
+  <div class="products-grid">
+    <!-- Loading state -->
+    <div *ngIf="products.length === 0" class="empty-state">
+      <mat-icon class="empty-icon">inventory_2</mat-icon>
+      <h3>No hay productos disponibles</h3>
+      <p>Intenta con otros filtros o vuelve más tarde</p>
+    </div>
+
+    <!-- Products -->
+    <div class="grid gap-6" [ngClass]="{
+      'grid-cols-1': true,
+      'sm:grid-cols-2': true,
+      'md:grid-cols-3': true,
+      'lg:grid-cols-4': true
+    }">
+      <div *ngFor="let product of products" class="product-item">
+        <app-product-card
+          [product]="product"
+          [quantityInCart]="getProductQuantityInCart(product.id)"
+          (addToCart)="onAddToCart(product)"
+          (viewDetails)="viewProductDetails(product)"
+        ></app-product-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="totalProducts > pageSize" class="catalog-pagination mt-8">
+    <mat-paginator
+      [length]="totalProducts"
+      [pageSize]="pageSize"
+      [pageIndex]="currentPage"
+      [pageSizeOptions]="[12, 24, 48]"
+      (page)="onPageChange($event)"
+      aria-label="Seleccionar página"
+    >
+    </mat-paginator>
+  </div>
+</div>

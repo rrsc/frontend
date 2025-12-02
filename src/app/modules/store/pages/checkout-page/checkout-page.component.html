@@ -1,0 +1,348 @@
+<app-store-layout>
+  <div class="checkout-page">
+    <div class="checkout-container" *ngIf="cart">
+      <!-- Checkout header -->
+      <div class="checkout-header">
+        <button mat-button (click)="goBack()" class="back-btn">
+          <mat-icon>arrow_back</mat-icon>
+          Volver al carrito
+        </button>
+        <h1 class="page-title">Finalizar compra</h1>
+        <div class="checkout-steps">
+          <div class="step active">
+            <div class="step-number">1</div>
+            <span>Carrito</span>
+          </div>
+          <div class="step-divider"></div>
+          <div class="step active">
+            <div class="step-number">2</div>
+            <span>Información</span>
+          </div>
+          <div class="step-divider"></div>
+          <div class="step">
+            <div class="step-number">3</div>
+            <span>Pago</span>
+          </div>
+          <div class="step-divider"></div>
+          <div class="step">
+            <div class="step-number">4</div>
+            <span>Confirmación</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="checkout-content grid gap-8">
+        <!-- Left column: Forms -->
+        <div class="checkout-forms">
+          <form [formGroup]="checkoutForm" (ngSubmit)="onSubmit()">
+            <!-- Shipping Address -->
+            <mat-card class="form-section">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon>local_shipping</mat-icon>
+                  Dirección de envío
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div formGroupName="shippingAddress" class="address-form grid gap-4">
+                  <div class="form-row grid gap-4">
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Nombre</mat-label>
+                      <input matInput formControlName="firstName" placeholder="Juan">
+                      <mat-error *ngIf="checkoutForm.get('shippingAddress.firstName')?.hasError('required')">
+                        Este campo es requerido
+                      </mat-error>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Apellido</mat-label>
+                      <input matInput formControlName="lastName" placeholder="Pérez">
+                      <mat-error *ngIf="checkoutForm.get('shippingAddress.lastName')?.hasError('required')">
+                        Este campo es requerido
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="form-row grid gap-4">
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Email</mat-label>
+                      <input matInput formControlName="email" type="email" placeholder="juan@email.com">
+                      <mat-error *ngIf="checkoutForm.get('shippingAddress.email')?.hasError('required')">
+                        Este campo es requerido
+                      </mat-error>
+                      <mat-error *ngIf="checkoutForm.get('shippingAddress.email')?.hasError('email')">
+                        Email inválido
+                      </mat-error>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Teléfono</mat-label>
+                      <input matInput formControlName="phone" placeholder="+52 123 456 7890">
+                      <mat-error *ngIf="checkoutForm.get('shippingAddress.phone')?.hasError('required')">
+                        Este campo es requerido
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Dirección</mat-label>
+                    <textarea matInput formControlName="address" placeholder="Calle, número, colonia" rows="2"></textarea>
+                    <mat-error *ngIf="checkoutForm.get('shippingAddress.address')?.hasError('required')">
+                      Este campo es requerido
+                    </mat-error>
+                  </mat-form-field>
+
+                  <div class="form-row grid gap-4">
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Ciudad</mat-label>
+                      <input matInput formControlName="city" placeholder="Ciudad de México">
+                      <mat-error *ngIf="checkoutForm.get('shippingAddress.city')?.hasError('required')">
+                        Este campo es requerido
+                      </mat-error>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Estado</mat-label>
+                      <input matInput formControlName="state" placeholder="CDMX">
+                      <mat-error *ngIf="checkoutForm.get('shippingAddress.state')?.hasError('required')">
+                        Este campo es requerido
+                      </mat-error>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Código Postal</mat-label>
+                      <input matInput formControlName="zipCode" placeholder="03100">
+                      <mat-error *ngIf="checkoutForm.get('shippingAddress.zipCode')?.hasError('required')">
+                        Este campo es requerido
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Shipping Method -->
+            <mat-card class="form-section">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon>delivery_dining</mat-icon>
+                  Método de envío
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="shipping-methods">
+                  <mat-radio-group [(ngModel)]="selectedShipping" [ngModelOptions]="{standalone: true}">
+                    <div *ngFor="let method of shippingMethods" class="shipping-option">
+                      <mat-radio-button [value]="method.value" class="w-full">
+                        <div class="option-content flex justify-between align-center w-full">
+                          <div class="option-info">
+                            <div class="option-label">{{ method.label }}</div>
+                            <div class="option-desc text-gray-600">
+                              {{ method.freeAbove ? `Gratis en pedidos mayores a $${method.freeAbove}` : 'Sin costo adicional' }}
+                            </div>
+                          </div>
+                          <div class="option-price">
+                            <span *ngIf="shippingCost === 0" class="free">Gratis</span>
+                            <span *ngIf="shippingCost > 0">{{ shippingCost | currency:'USD':'symbol':'1.2-2' }}</span>
+                          </div>
+                        </div>
+                      </mat-radio-button>
+                    </div>
+                  </mat-radio-group>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Payment Method -->
+            <mat-card class="form-section">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon>payment</mat-icon>
+                  Método de pago
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <mat-radio-group formControlName="paymentMethod" class="payment-methods">
+                  <div *ngFor="let method of paymentMethods" class="payment-option">
+                    <mat-radio-button [value]="method.value" class="w-full">
+                      <div class="option-content flex align-center gap-3">
+                        <mat-icon>{{ method.icon }}</mat-icon>
+                        <span>{{ method.label }}</span>
+                      </div>
+                    </mat-radio-button>
+                  </div>
+                </mat-radio-group>
+
+                <!-- Card details (only show if card selected) -->
+                <div 
+                  *ngIf="checkoutForm.get('paymentMethod')?.value === 'card'"
+                  formGroupName="cardDetails"
+                  class="card-details mt-4"
+                >
+                  <div class="form-row grid gap-4">
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Número de tarjeta</mat-label>
+                      <input matInput formControlName="cardNumber" placeholder="1234 5678 9012 3456" mask="0000 0000 0000 0000">
+                      <mat-icon matSuffix>credit_card</mat-icon>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="form-row grid gap-4">
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Titular de la tarjeta</mat-label>
+                      <input matInput formControlName="cardHolder" placeholder="JUAN PEREZ">
+                    </mat-form-field>
+                  </div>
+
+                  <div class="form-row grid gap-4">
+                    <mat-form-field appearance="outline" class="w-1/2">
+                      <mat-label>Mes de expiración</mat-label>
+                      <mat-select formControlName="expiryMonth">
+                        <mat-option *ngFor="let month of [1,2,3,4,5,6,7,8,9,10,11,12]" [value]="month">
+                          {{ month }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="w-1/2">
+                      <mat-label>Año de expiración</mat-label>
+                      <mat-select formControlName="expiryYear">
+                        <mat-option *ngFor="let year of [2024,2025,2026,2027,2028,2029,2030]" [value]="year">
+                          {{ year }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="w-1/2">
+                      <mat-label>CVV</mat-label>
+                      <input matInput formControlName="cvv" type="password" placeholder="123" maxlength="3">
+                      <mat-icon matSuffix>lock</mat-icon>
+                    </mat-form-field>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Additional notes -->
+            <mat-card class="form-section">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon>note</mat-icon>
+                  Notas adicionales
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Instrucciones especiales para la entrega</mat-label>
+                  <textarea 
+                    matInput 
+                    formControlName="notes" 
+                    placeholder="Ej: Dejar en recepción, llamar antes de entregar, etc."
+                    rows="3"
+                  ></textarea>
+                </mat-form-field>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Terms and conditions -->
+            <div class="terms-section">
+              <mat-checkbox formControlName="termsAccepted" color="primary">
+                Acepto los <a href="#" class="terms-link">términos y condiciones</a> y la 
+                <a href="#" class="terms-link">política de privacidad</a>
+              </mat-checkbox>
+              <mat-error *ngIf="checkoutForm.get('termsAccepted')?.hasError('required') && checkoutForm.get('termsAccepted')?.touched">
+                Debes aceptar los términos y condiciones
+              </mat-error>
+            </div>
+          </form>
+        </div>
+
+        <!-- Right column: Order summary -->
+        <div class="order-summary">
+          <mat-card class="summary-card">
+            <mat-card-header>
+              <mat-card-title>Resumen del pedido</mat-card-title>
+            </mat-card-header>
+
+            <mat-card-content>
+              <!-- Order items -->
+              <div class="order-items">
+                <h3 class="section-title">Productos ({{ cart.itemCount }})</h3>
+                <div *ngFor="let item of cart.items" class="order-item flex justify-between py-2">
+                  <div class="item-info">
+                    <div class="item-name">{{ item.name }}</div>
+                    <div class="item-details text-gray-600 text-sm">
+                      Cantidad: {{ item.quantity }} × {{ item.price | currency:'USD':'symbol':'1.2-2' }}
+                    </div>
+                  </div>
+                  <div class="item-subtotal font-medium">
+                    {{ (item.price * item.quantity) | currency:'USD':'symbol':'1.2-2' }}
+                  </div>
+                </div>
+              </div>
+
+              <mat-divider class="my-4"></mat-divider>
+
+              <!-- Price breakdown -->
+              <div class="price-breakdown">
+                <div class="price-row flex justify-between py-1">
+                  <span>Subtotal</span>
+                  <span>{{ cart.subtotal | currency:'USD':'symbol':'1.2-2' }}</span>
+                </div>
+                <div class="price-row flex justify-between py-1">
+                  <span>Envío</span>
+                  <span [ngClass]="{'free': shippingCost === 0}">
+                    {{ shippingCost === 0 ? 'Gratis' : (shippingCost | currency:'USD':'symbol':'1.2-2') }}
+                  </span>
+                </div>
+                <div class="price-row flex justify-between py-1">
+                  <span>IVA (16%)</span>
+                  <span>{{ cart.total - cart.subtotal | currency:'USD':'symbol':'1.2-2' }}</span>
+                </div>
+                <mat-divider class="my-3"></mat-divider>
+                <div class="total-row flex justify-between py-2 font-bold text-lg">
+                  <span>Total</span>
+                  <span class="total-amount">{{ total | currency:'USD':'symbol':'1.2-2' }}</span>
+                </div>
+              </div>
+
+              <!-- Submit button -->
+              <div class="submit-section mt-6">
+                <button 
+                  mat-raised-button 
+                  color="primary" 
+                  class="submit-btn full-width"
+                  (click)="onSubmit()"
+                  [disabled]="loading || checkoutForm.invalid"
+                >
+                  <span *ngIf="!loading">Realizar pedido</span>
+                  <mat-spinner *ngIf="loading" diameter="24"></mat-spinner>
+                </button>
+                <p class="secure-payment text-center text-gray-600 text-sm mt-2">
+                  <mat-icon class="text-green-600">lock</mat-icon>
+                  Pago 100% seguro
+                </p>
+              </div>
+
+              <!-- Security info -->
+              <div class="security-info mt-6">
+                <div class="security-item flex align-center gap-2 mb-2">
+                  <mat-icon class="text-blue-600">verified</mat-icon>
+                  <span class="text-sm">Garantía de devolución en 30 días</span>
+                </div>
+                <div class="security-item flex align-center gap-2 mb-2">
+                  <mat-icon class="text-green-600">security</mat-icon>
+                  <span class="text-sm">Datos protegidos con encriptación SSL</span>
+                </div>
+                <div class="security-item flex align-center gap-2">
+                  <mat-icon class="text-orange-600">support_agent</mat-icon>
+                  <span class="text-sm">Soporte al cliente 24/7</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div *ngIf="loading" class="loading-overlay">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p class="mt-4">Procesando tu pedido...</p>
+    </div>
+  </div>
+</app-store-layout>

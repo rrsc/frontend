@@ -1,0 +1,28 @@
+<nav class="breadcrumb" aria-label="Migas de pan">
+  <ol class="breadcrumb-list">
+    <li *ngFor="let item of items; let i = index" 
+        [class]="getItemClass(item, i)">
+      
+      <!-- Icono (si existe) -->
+      <mat-icon *ngIf="item.icon" class="breadcrumb-icon">
+        {{ item.icon }}
+      </mat-icon>
+      
+      <!-- Enlace o texto -->
+      <a *ngIf="item.url && !isLastItem(i)" 
+         [routerLink]="item.url" 
+         class="breadcrumb-link">
+        {{ item.label }}
+      </a>
+      
+      <span *ngIf="isLastItem(i) || !item.url" class="breadcrumb-text">
+        {{ item.label }}
+      </span>
+      
+      <!-- Separador (excepto último) -->
+      <mat-icon *ngIf="!isLastItem(i)" class="breadcrumb-separator">
+        {{ separator }}
+      </mat-icon>
+    </li>
+  </ol>
+</nav>

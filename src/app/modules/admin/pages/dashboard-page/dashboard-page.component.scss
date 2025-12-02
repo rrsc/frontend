@@ -1,0 +1,225 @@
+.dashboard-page {
+  .page-header {
+    margin-bottom: 32px;
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+
+      .page-title {
+        font-size: 32px;
+        font-weight: 600;
+        margin: 0;
+        color: #333;
+      }
+
+      .header-actions {
+        .date-range-selector {
+          width: 150px;
+        }
+      }
+    }
+
+    .page-subtitle {
+      color: #666;
+      margin: 0;
+      font-size: 14px;
+    }
+  }
+
+  .loading-state {
+    text-align: center;
+    padding: 60px 20px;
+
+    p {
+      color: #666;
+      font-size: 16px;
+      margin: 0;
+    }
+  }
+
+  .dashboard-content {
+    .charts-row {
+      grid-template-columns: 1fr;
+
+      @media (min-width: 1200px) {
+        grid-template-columns: 2fr 1fr;
+      }
+
+      .chart-card {
+        border-radius: 12px;
+
+        mat-card-header {
+          padding: 20px 20px 0;
+
+          mat-card-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+
+            mat-icon {
+              color: #666;
+            }
+          }
+
+          mat-card-subtitle {
+            color: #666;
+            margin-top: 4px;
+          }
+        }
+
+        mat-card-content {
+          padding: 20px;
+          min-height: 300px;
+
+          .chart-stats {
+            .stat-item {
+              text-align: center;
+
+              .stat-label {
+                font-size: 12px;
+                color: #666;
+                margin-bottom: 4px;
+              }
+
+              .stat-value {
+                font-size: 18px;
+                font-weight: 600;
+
+                &.positive {
+                  color: #4caf50;
+                }
+
+                &.negative {
+                  color: #f44336;
+                }
+              }
+            }
+          }
+
+          .inventory-stats {
+            .stat-item {
+              .stat-label {
+                font-size: 14px;
+                color: #666;
+
+                .status-dot {
+                  width: 8px;
+                  height: 8px;
+                  border-radius: 50%;
+
+                  &.normal {
+                    background: #4caf50;
+                  }
+
+                  &.low {
+                    background: #ff9800;
+                  }
+                }
+              }
+
+              .stat-value {
+                font-size: 16px;
+                font-weight: 500;
+                color: #333;
+                margin-top: 4px;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .tables-row {
+      grid-template-columns: 1fr;
+
+      @media (min-width: 1200px) {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .table-card {
+        border-radius: 12px;
+
+        mat-card-header {
+          padding: 20px 20px 0;
+
+          mat-card-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+
+            mat-icon {
+              color: #666;
+            }
+          }
+
+          mat-card-subtitle {
+            color: #666;
+            margin-top: 4px;
+          }
+        }
+
+        mat-card-content {
+          padding: 20px;
+        }
+      }
+    }
+
+    .quick-actions {
+      .section-title {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: #333;
+      }
+
+      .actions-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+
+        .action-btn {
+          height: 56px;
+          font-weight: 500;
+          border-radius: 8px;
+
+          mat-icon {
+            margin-right: 8px;
+          }
+        }
+      }
+    }
+  }
+
+  .no-data-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: #f9f9f9;
+    border-radius: 12px;
+
+    .no-data-icon {
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+      color: #ccc;
+      margin-bottom: 20px;
+    }
+
+    h3 {
+      font-size: 20px;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    p {
+      color: #666;
+      margin: 0 0 16px 0;
+    }
+  }
+}

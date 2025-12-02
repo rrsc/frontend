@@ -1,0 +1,123 @@
+<div class="store-layout">
+  <!-- Header -->
+  <header class="store-header">
+    <div class="header-container">
+      <!-- Logo -->
+      <div class="logo">
+        <a routerLink="/store" class="flex align-center gap-2">
+          <mat-icon class="logo-icon">store</mat-icon>
+          <span class="logo-text">MediaStore</span>
+        </a>
+      </div>
+
+      <!-- Search bar -->
+      <div class="search-container" *ngIf="!(isHandset$ | async)">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Buscar productos</mat-label>
+          <input matInput #searchInput placeholder="Libros, películas, música...">
+          <button mat-icon-button matSuffix (click)="searchProducts(searchInput.value)">
+            <mat-icon>search</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
+
+      <!-- User actions -->
+      <div class="user-actions flex align-center gap-3">
+        <!-- Cart -->
+        <button mat-icon-button [matBadge]="cartItemCount" matBadgeColor="warn" routerLink="/store/cart">
+          <mat-icon>shopping_cart</mat-icon>
+        </button>
+
+        <!-- User menu -->
+        <ng-container *ngIf="authService.isLoggedIn(); else loginButton">
+          <button mat-icon-button [matMenuTriggerFor]="userMenu">
+            <mat-icon>account_circle</mat-icon>
+          </button>
+        </ng-container>
+
+        <ng-template #loginButton>
+          <a mat-button routerLink="/auth/login" class="login-btn">
+            <mat-icon>login</mat-icon>
+            Iniciar Sesión
+          </a>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Mobile search -->
+    <div class="mobile-search" *ngIf="isHandset$ | async">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Buscar productos</mat-label>
+        <input matInput placeholder="Buscar...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <!-- Categories navigation -->
+    <nav class="categories-nav">
+      <div class="nav-container">
+        <a 
+          *ngFor="let cat of categories"
+          [routerLink]="['/store/category', cat.id]"
+          routerLinkActive="active"
+          class="category-link"
+        >
+          <mat-icon>{{cat.icon}}</mat-icon>
+          <span>{{cat.name}}</span>
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main content -->
+  <main class="store-main">
+    <div class="main-container">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="store-footer">
+    <div class="footer-container">
+      <div class="footer-section">
+        <h3>MediaStore</h3>
+        <p>Tu tienda online de libros, películas y música</p>
+      </div>
+      <div class="footer-section">
+        <h4>Contacto</h4>
+        <p>Email: info@mediastore.com</p>
+        <p>Teléfono: +1 234 567 890</p>
+      </div>
+      <div class="footer-section">
+        <h4>Enlaces rápidos</h4>
+        <a routerLink="/store">Inicio</a>
+        <a routerLink="/store/cart">Carrito</a>
+        <a routerLink="/auth/login">Mi cuenta</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2024 MediaStore. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <!-- User Menu -->
+  <mat-menu #userMenu="matMenu">
+    <button mat-menu-item routerLink="/admin/dashboard" *ngIf="authService.hasRole('admin')">
+      <mat-icon>admin_panel_settings</mat-icon>
+      <span>Panel Admin</span>
+    </button>
+    <button mat-menu-item routerLink="/profile">
+      <mat-icon>person</mat-icon>
+      <span>Mi Perfil</span>
+    </button>
+    <button mat-menu-item routerLink="/orders">
+      <mat-icon>shopping_bag</mat-icon>
+      <span>Mis Pedidos</span>
+    </button>
+    <mat-divider></mat-divider>
+    <button mat-menu-item (click)="authService.logout()">
+      <mat-icon>logout</mat-icon>
+      <span>Cerrar Sesión</span>
+    </button>
+  </mat-menu>
+</div>

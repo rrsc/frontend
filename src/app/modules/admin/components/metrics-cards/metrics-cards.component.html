@@ -1,0 +1,24 @@
+<div class="metrics-cards">
+  <div class="cards-grid grid gap-6">
+    <div *ngFor="let card of metricsCards" [class]="getCardClass(card)" class="metric-card">
+      <div class="card-content">
+        <div class="card-icon">
+          <mat-icon>{{ card.icon }}</mat-icon>
+        </div>
+        <div class="card-info">
+          <div class="card-title">{{ card.title }}</div>
+          <div class="card-value">
+            {{ card.prefix }}{{ formatValue(card.value) }}{{ card.suffix }}
+          </div>
+        </div>
+      </div>
+      <div class="card-trend" [ngClass]="{
+        'positive': card.trendPositive,
+        'negative': !card.trendPositive
+      }">
+        <mat-icon>{{ card.trendPositive ? 'trending_up' : 'trending_down' }}</mat-icon>
+        <span>{{ card.trend }}</span>
+      </div>
+    </div>
+  </div>
+</div>

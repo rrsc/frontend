@@ -1,0 +1,188 @@
+<app-store-layout>
+  <div class="cart-page">
+    <div class="cart-container" *ngIf="cart && cart.items.length > 0; else emptyCart">
+      <div class="cart-header">
+        <h1 class="page-title">Carrito de Compras</h1>
+        <div class="cart-summary">
+          <span class="item-count">{{ cart.itemCount }} producto(s) en el carrito</span>
+        </div>
+      </div>
+
+      <div class="cart-content grid gap-8">
+        <!-- Cart items -->
+        <div class="cart-items">
+          <div class="items-header grid-cols-5 gap-4 hidden sm:grid mb-4">
+            <div class="col-span-2">Producto</div>
+            <div class="text-center">Precio</div>
+            <div class="text-center">Cantidad</div>
+            <div class="text-center">Subtotal</div>
+          </div>
+
+          <div class="items-list">
+            <div *ngFor="let item of cart.items" class="cart-item grid gap-4 py-6 border-b">
+              <!-- Product info -->
+              <div class="product-info col-span-2 flex gap-4">
+                <div class="product-image">
+                  <img 
+                    [src]="item.imageUrl || 'assets/images/default-product.png'" 
+                    [alt]="item.name"
+                    class="image"
+                  />
+                </div>
+                <div class="product-details">
+                  <div class="product-category">
+                    <span class="category-badge">{{ getCategoryLabel(item.category) }}</span>
+                  </div>
+                  <h3 class="product-name">{{ item.name }}</h3>
+                  <div class="product-actions">
+                    <button 
+                      mat-button 
+                      color="warn" 
+                      (click)="removeItem(item)"
+                      [disabled]="loading"
+                    >
+                      <mat-icon>delete</mat-icon>
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Price -->
+              <div class="product-price text-center">
+                <div class="price-value">{{ item.price | currency:'USD':'symbol':'1.2-2' }}</div>
+              </div>
+
+              <!-- Quantity -->
+              <div class="product-quantity">
+                <div class="quantity-selector flex align-center justify-center">
+                  <button 
+                    mat-icon-button 
+                    (click)="updateQuantity(item, item.quantity - 1)"
+                    [disabled]="loading || item.quantity <= 1"
+                  >
+                    <mat-icon>remove</mat-icon>
+                  </button>
+                  <div class="quantity-display mx-2">{{ item.quantity }}</div>
+                  <button 
+                    mat-icon-button 
+                    (click)="updateQuantity(item, item.quantity + 1)"
+                    [disabled]="loading"
+                  >
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Subtotal -->
+              <div class="product-subtotal text-center">
+                <div class="subtotal-value font-medium">
+                  {{ getItemSubtotal(item) | currency:'USD':'symbol':'1.2-2' }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cart actions -->
+          <div class="cart-actions mt-6">
+            <div class="flex justify-between">
+              <button 
+                mat-button 
+                (click)="continueShopping()"
+                class="continue-btn"
+              >
+                <mat-icon>arrow_back</mat-icon>
+                Continuar comprando
+              </button>
+              <button 
+                mat-button 
+                color="warn" 
+                (click)="clearCart()"
+                [disabled]="loading"
+              >
+                <mat-icon>delete_sweep</mat-icon>
+                Vaciar carrito
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order summary -->
+        <div class="order-summary">
+          <mat-card class="summary-card">
+            <mat-card-header>
+              <mat-card-title>Resumen del pedido</mat-card-title>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div class="summary-details">
+                <div class="summary-row flex justify-between py-2">
+                  <span>Subtotal</span>
+                  <span>{{ cart.subtotal | currency:'USD':'symbol':'1.2-2' }}</span>
+                </div>
+                <div class="summary-row flex justify-between py-2">
+                  <span>Envío</span>
+                  <span class="free-shipping">Gratis</span>
+                </div>
+                <div class="summary-row flex justify-between py-2">
+                  <span>IVA (16%)</span>
+                  <span>{{ cart.total - cart.subtotal | currency:'USD':'symbol':'1.2-2' }}</span>
+                </div>
+                <mat-divider class="my-3"></mat-divider>
+                <div class="total-row flex justify-between py-2 font-medium text-lg">
+                  <span>Total</span>
+                  <span class="total-amount">{{ cart.total | currency:'USD':'symbol':'1.2-2' }}</span>
+                </div>
+              </div>
+
+              <div class="checkout-actions mt-6">
+                <button 
+                  mat-raised-button 
+                  color="primary" 
+                  class="checkout-btn full-width"
+                  (click)="proceedToCheckout()"
+                  [disabled]="loading"
+                >
+                  <mat-icon>shopping_cart_checkout</mat-icon>
+                  Proceder al pago
+                </button>
+
+                <div class="payment-methods mt-4">
+                  <p class="text-sm text-gray-600">Métodos de pago aceptados:</p>
+                  <div class="payment-icons flex gap-2 mt-2">
+                    <mat-icon class="text-blue-600">credit_card</mat-icon>
+                    <mat-icon class="text-green-600">account_balance</mat-icon>
+                    <mat-icon class="text-orange-600">payments</mat-icon>
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty cart state -->
+    <ng-template #emptyCart>
+      <div class="empty-cart">
+        <mat-icon class="empty-icon">shopping_cart</mat-icon>
+        <h2>Tu carrito está vacío</h2>
+        <p class="text-gray-600">Agrega productos para continuar con tu compra</p>
+        <button 
+          mat-raised-button 
+          color="primary" 
+          (click)="continueShopping()"
+          class="mt-4"
+        >
+          <mat-icon>store</mat-icon>
+          Ver productos
+        </button>
+      </div>
+    </ng-template>
+
+    <!-- Loading overlay -->
+    <div *ngIf="loading" class="loading-overlay">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+  </div>
+</app-store-layout>

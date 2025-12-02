@@ -1,0 +1,187 @@
+<app-admin-layout>
+  <div class="dashboard-page">
+    <!-- Page header -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="page-title">Dashboard</h1>
+        <div class="header-actions flex gap-3">
+          <!-- Date range selector -->
+          <mat-form-field appearance="outline" class="date-range-selector">
+            <mat-label>Período</mat-label>
+            <mat-select [(ngModel)]="dateRange" (selectionChange)="onDateRangeChange(dateRange)">
+              <mat-option value="day">Hoy</mat-option>
+              <mat-option value="week">Esta semana</mat-option>
+              <mat-option value="month">Este mes</mat-option>
+              <mat-option value="year">Este año</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Refresh button -->
+          <button 
+            mat-icon-button 
+            (click)="refreshDashboard()"
+            [disabled]="loading"
+            matTooltip="Actualizar datos"
+          >
+            <mat-icon>refresh</mat-icon>
+          </button>
+
+          <!-- Export button -->
+          <button mat-stroked-button>
+            <mat-icon>download</mat-icon>
+            Exportar
+          </button>
+        </div>
+      </div>
+      <p class="page-subtitle">Resumen general y métricas clave del negocio</p>
+    </div>
+
+    <!-- Loading state -->
+    <div *ngIf="loading" class="loading-state">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p class="mt-4">Cargando datos del dashboard...</p>
+    </div>
+
+    <!-- Dashboard content -->
+    <div *ngIf="!loading && metrics" class="dashboard-content">
+      <!-- Metrics cards -->
+      <app-metrics-cards [metrics]="metrics"></app-metrics-cards>
+
+      <!-- Charts row -->
+      <div class="charts-row grid gap-6 mt-6">
+        <!-- Sales chart -->
+        <mat-card class="chart-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>trending_up</mat-icon>
+              Ventas e Ingresos
+            </mat-card-title>
+            <mat-card-subtitle>Evolución mensual</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <app-sales-chart [chartData]="salesChartData"></app-sales-chart>
+            <div class="chart-stats flex justify-between mt-4">
+              <div class="stat-item">
+                <div class="stat-label">Crecimiento ventas</div>
+                <div class="stat-value" [ngClass]="{
+                  'positive': getSalesGrowth() >= 0,
+                  'negative': getSalesGrowth() < 0
+                }">
+                  {{ getSalesGrowth() >= 0 ? '+' : '' }}{{ getSalesGrowth() | number:'1.1-1' }}%
+                </div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">Crecimiento ingresos</div>
+                <div class="stat-value" [ngClass]="{
+                  'positive': getRevenueGrowth() >= 0,
+                  'negative': getRevenueGrowth() < 0
+                }">
+                  {{ getRevenueGrowth() >= 0 ? '+' : '' }}{{ getRevenueGrowth() | number:'1.1-1' }}%
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Inventory chart -->
+        <mat-card class="chart-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>inventory_2</mat-icon>
+              Estado del Inventario
+            </mat-card-title>
+            <mat-card-subtitle>Distribución del stock</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <app-inventory-chart [chartData]="inventoryChartData"></app-inventory-chart>
+            <div class="inventory-stats grid gap-3 mt-4">
+              <div class="stat-item">
+                <div class="stat-label flex align-center gap-2">
+                  <div class="status-dot normal"></div>
+                  <span>Stock Normal</span>
+                </div>
+                <div class="stat-value">
+                  {{ metrics.totalProducts - metrics.lowStockProducts }} productos
+                </div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label flex align-center gap-2">
+                  <div class="status-dot low"></div>
+                  <span>Stock Bajo</span>
+                </div>
+                <div class="stat-value">
+                  {{ metrics.lowStockProducts }} productos
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Tables row -->
+      <div class="tables-row grid gap-6 mt-6">
+        <!-- Top products -->
+        <mat-card class="table-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>star</mat-icon>
+              Productos Más Vendidos
+            </mat-card-title>
+            <mat-card-subtitle>Top 5 este mes</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <app-top-products-table [products]="metrics.topProducts"></app-top-products-table>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Recent sales -->
+        <mat-card class="table-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>receipt</mat-icon>
+              Ventas Recientes
+            </mat-card-title>
+            <mat-card-subtitle>Últimas 5 ventas</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <app-recent-sales-table></app-recent-sales-table>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="quick-actions mt-6">
+        <h2 class="section-title">Acciones Rápidas</h2>
+        <div class="actions-grid grid gap-4">
+          <button mat-stroked-button routerLink="/admin/products/new" class="action-btn">
+            <mat-icon>add_circle</mat-icon>
+            Agregar Producto
+          </button>
+          <button mat-stroked-button routerLink="/admin/sales/new" class="action-btn">
+            <mat-icon>point_of_sale</mat-icon>
+            Nueva Venta Manual
+          </button>
+          <button mat-stroked-button routerLink="/admin/reports" class="action-btn">
+            <mat-icon>summarize</mat-icon>
+            Generar Reporte
+          </button>
+          <button mat-stroked-button routerLink="/admin/users" class="action-btn">
+            <mat-icon>person_add</mat-icon>
+            Gestionar Usuarios
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- No data state -->
+    <div *ngIf="!loading && !metrics" class="no-data-state">
+      <mat-icon class="no-data-icon">bar_chart</mat-icon>
+      <h3>No hay datos disponibles</h3>
+      <p>No se pudieron cargar las métricas del dashboard</p>
+      <button mat-raised-button color="primary" (click)="refreshDashboard()" class="mt-4">
+        <mat-icon>refresh</mat-icon>
+        Intentar nuevamente
+      </button>
+    </div>
+  </div>
+</app-admin-layout>

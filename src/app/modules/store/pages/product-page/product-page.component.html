@@ -1,0 +1,253 @@
+<app-store-layout>
+  <div class="product-page">
+    <ngx-spinner 
+      *ngIf="loading"
+      type="ball-scale-multiple"
+      size="medium"
+      color="#2196f3"
+      [fullScreen]="true"
+    ></ngx-spinner>
+
+    <div *ngIf="product" class="product-container">
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb mb-6">
+        <a routerLink="/store">Inicio</a>
+        <mat-icon>chevron_right</mat-icon>
+        <a [routerLink]="['/store/category', product.category]">
+          {{ product.category | titlecase }}
+        </a>
+        <mat-icon>chevron_right</mat-icon>
+        <span class="current">{{ product.name }}</span>
+      </nav>
+
+      <!-- Product details -->
+      <div class="product-details grid gap-8">
+        <!-- Left column: Images -->
+        <div class="product-images">
+          <div class="main-image">
+            <img 
+              [src]="product.imageUrl || 'assets/images/default-product.png'" 
+              [alt]="product.name"
+              class="product-image"
+            />
+          </div>
+        </div>
+
+        <!-- Middle column: Info -->
+        <div class="product-info">
+          <div class="product-header">
+            <span class="product-category">{{ product.category | titlecase }}</span>
+            <h1 class="product-name">{{ product.name }}</h1>
+            
+            <div class="product-meta">
+              <div class="product-rating">
+                <mat-icon *ngFor="let star of [1,2,3,4,5]" class="star">star</mat-icon>
+                <span>(24 reseñas)</span>
+              </div>
+              <div class="product-stock" [ngClass]="{
+                'in-stock': product.stock > 5,
+                'low-stock': product.stock > 0 && product.stock <= 5,
+                'out-of-stock': product.stock === 0
+              }">
+                <mat-icon>inventory_2</mat-icon>
+                <span *ngIf="product.stock > 5">Disponible</span>
+                <span *ngIf="product.stock > 0 && product.stock <= 5">Últimas unidades</span>
+                <span *ngIf="product.stock === 0">Agotado</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-price-section">
+            <div class="price">{{ product.price | currency:'USD':'symbol':'1.2-2' }}</div>
+            <div class="tax-info">Precio final incluido IVA</div>
+          </div>
+
+          <div class="product-description">
+            <h3>Descripción</h3>
+            <p>{{ product.description || 'Sin descripción disponible.' }}</p>
+          </div>
+
+          <!-- Product-specific details -->
+          <div class="product-specific-details" *ngIf="getProductDetails()">
+            <ng-container [ngSwitch]="productType">
+              <!-- Book details -->
+              <div *ngSwitchCase="'book'" class="details-grid">
+                <div class="detail-item">
+                  <span class="label">Autor:</span>
+                  <span class="value">{{ getProductDetails().author }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">ISBN:</span>
+                  <span class="value">{{ getProductDetails().isbn }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Editorial:</span>
+                  <span class="value">{{ getProductDetails().publisher }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Páginas:</span>
+                  <span class="value">{{ getProductDetails().pages }}</span>
+                </div>
+              </div>
+
+              <!-- Movie details -->
+              <div *ngSwitchCase="'movie'" class="details-grid">
+                <div class="detail-item">
+                  <span class="label">Director:</span>
+                  <span class="value">{{ getProductDetails().director }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Duración:</span>
+                  <span class="value">{{ getProductDetails().duration }} minutos</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Clasificación:</span>
+                  <span class="value">{{ getProductDetails().rating }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Año:</span>
+                  <span class="value">{{ getProductDetails().releaseYear }}</span>
+                </div>
+              </div>
+
+              <!-- Vinyl details -->
+              <div *ngSwitchCase="'vinyl'" class="details-grid">
+                <div class="detail-item">
+                  <span class="label">Artista:</span>
+                  <span class="value">{{ getProductDetails().artist }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Discográfica:</span>
+                  <span class="value">{{ getProductDetails().label }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Año:</span>
+                  <span class="value">{{ getProductDetails().releaseYear }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Pistas:</span>
+                  <span class="value">{{ getProductDetails().tracks }}</span>
+                </div>
+              </div>
+
+              <!-- CD details -->
+              <div *ngSwitchCase="'compact-disc'" class="details-grid">
+                <div class="detail-item">
+                  <span class="label">Artista:</span>
+                  <span class="value">{{ getProductDetails().artist }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Discográfica:</span>
+                  <span class="value">{{ getProductDetails().label }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Año:</span>
+                  <span class="value">{{ getProductDetails().releaseYear }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Pistas:</span>
+                  <span class="value">{{ getProductDetails().tracks }}</span>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- Right column: Actions -->
+        <div class="product-actions">
+          <mat-card class="actions-card">
+            <mat-card-content>
+              <!-- Quantity selector -->
+              <div class="quantity-selector mb-6">
+                <label class="selector-label">Cantidad</label>
+                <div class="selector-controls flex align-center gap-2">
+                  <button 
+                    mat-icon-button 
+                    (click)="decrementQuantity()"
+                    [disabled]="quantity <= 1"
+                  >
+                    <mat-icon>remove</mat-icon>
+                  </button>
+                  <div class="quantity-display">{{ quantity }}</div>
+                  <button 
+                    mat-icon-button 
+                    (click)="incrementQuantity()"
+                    [disabled]="!product || quantity >= product.stock"
+                  >
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
+                <div class="stock-info text-gray-600 mt-2">
+                  {{ product.stock }} disponibles
+                </div>
+              </div>
+
+              <!-- Action buttons -->
+              <div class="action-buttons flex flex-column gap-3">
+                <button 
+                  mat-raised-button 
+                  color="primary" 
+                  class="add-to-cart-btn"
+                  (click)="addToCart()"
+                  [disabled]="!product || product.stock === 0"
+                >
+                  <mat-icon>add_shopping_cart</mat-icon>
+                  Añadir al carrito
+                </button>
+
+                <button 
+                  mat-raised-button 
+                  color="accent" 
+                  class="buy-now-btn"
+                  (click)="buyNow()"
+                  [disabled]="!product || product.stock === 0"
+                >
+                  <mat-icon>flash_on</mat-icon>
+                  Comprar ahora
+                </button>
+
+                <button mat-stroked-button class="wishlist-btn">
+                  <mat-icon>favorite_border</mat-icon>
+                  Añadir a favoritos
+                </button>
+              </div>
+
+              <!-- Quick info -->
+              <div class="quick-info mt-6">
+                <div class="info-item flex align-center gap-2">
+                  <mat-icon class="text-green-600">local_shipping</mat-icon>
+                  <span>Envío gratis en pedidos superiores a $50</span>
+                </div>
+                <div class="info-item flex align-center gap-2">
+                  <mat-icon class="text-blue-600">assignment_return</mat-icon>
+                  <span>Devoluciones gratuitas en 30 días</span>
+                </div>
+                <div class="info-item flex align-center gap-2">
+                  <mat-icon class="text-orange-600">security</mat-icon>
+                  <span>Pago 100% seguro</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+
+      <!-- Related products -->
+      <div *ngIf="relatedProducts.length > 0" class="related-products mt-12">
+        <h2 class="section-title">Productos relacionados</h2>
+        <div class="related-grid grid gap-4 mt-6">
+          <div 
+            *ngFor="let related of relatedProducts" 
+            class="related-item"
+            [routerLink]="['/store/product', related.id]"
+          >
+            <app-product-card
+              [product]="related"
+              [showActions]="false"
+            ></app-product-card>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-store-layout>

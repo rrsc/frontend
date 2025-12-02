@@ -1,0 +1,180 @@
+<app-store-layout>
+  <div class="order-confirmation-page">
+    <div class="confirmation-container" *ngIf="sale; else loadingState">
+      <!-- Success message -->
+      <div class="success-message text-center">
+        <mat-icon class="success-icon">check_circle</mat-icon>
+        <h1 class="success-title">¡Pedido confirmado!</h1>
+        <p class="success-text">
+          Tu pedido ha sido procesado exitosamente. Hemos enviado un correo de confirmación a tu email.
+        </p>
+        <div class="order-number">
+          Número de pedido: <strong>{{ sale.id }}</strong>
+        </div>
+      </div>
+
+      <!-- Order summary -->
+      <div class="order-summary">
+        <div class="summary-grid grid gap-6">
+          <!-- Order details -->
+          <mat-card class="summary-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>receipt</mat-icon>
+                Detalles del pedido
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="details-list">
+                <div class="detail-item flex justify-between py-2">
+                  <span class="label">Fecha del pedido:</span>
+                  <span class="value">{{ sale.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+                <div class="detail-item flex justify-between py-2">
+                  <span class="label">Estado:</span>
+                  <span class="value">
+                    <mat-chip [color]="getStatusColor(sale.status)" selected>
+                      {{ getStatusLabel(sale.status) }}
+                    </mat-chip>
+                  </span>
+                </div>
+                <div class="detail-item flex justify-between py-2">
+                  <span class="label">Método de pago:</span>
+                  <span class="value">{{ getPaymentMethodLabel(sale.paymentMethod) }}</span>
+                </div>
+                <div class="detail-item flex justify-between py-2">
+                  <span class="label">Notas:</span>
+                  <span class="value">{{ sale.notes || 'Sin notas' }}</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Order items -->
+          <mat-card class="summary-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>shopping_bag</mat-icon>
+                Productos
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="order-items">
+                <div *ngFor="let item of sale.items" class="order-item flex justify-between py-3 border-b">
+                  <div class="item-info">
+                    <div class="item-name">{{ item.name }}</div>
+                    <div class="item-details text-gray-600 text-sm">
+                      Cantidad: {{ item.quantity }} × {{ item.price | currency:'USD':'symbol':'1.2-2' }}
+                    </div>
+                  </div>
+                  <div class="item-subtotal font-medium">
+                    {{ item.subtotal | currency:'USD':'symbol':'1.2-2' }}
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Price summary -->
+          <mat-card class="summary-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>attach_money</mat-icon>
+                Resumen de precios
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="price-summary">
+                <div class="price-row flex justify-between py-2">
+                  <span>Subtotal:</span>
+                  <span>{{ sale.subtotal | currency:'USD':'symbol':'1.2-2' }}</span>
+                </div>
+                <div class="price-row flex justify-between py-2">
+                  <span>IVA (16%):</span>
+                  <span>{{ sale.tax | currency:'USD':'symbol':'1.2-2' }}</span>
+                </div>
+                <mat-divider class="my-3"></mat-divider>
+                <div class="total-row flex justify-between py-2 font-bold text-lg">
+                  <span>Total:</span>
+                  <span class="total-amount">{{ sale.total | currency:'USD':'symbol':'1.2-2' }}</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="confirmation-actions">
+        <div class="actions-grid grid gap-4">
+          <button 
+            mat-raised-button 
+            color="primary" 
+            (click)="downloadInvoice()"
+            class="action-btn"
+          >
+            <mat-icon>download</mat-icon>
+            Descargar factura
+          </button>
+          
+          <button 
+            mat-stroked-button 
+            (click)="printOrder()"
+            class="action-btn"
+          >
+            <mat-icon>print</mat-icon>
+            Imprimir pedido
+          </button>
+          
+          <button 
+            mat-button 
+            routerLink="/store"
+            class="action-btn"
+          >
+            <mat-icon>store</mat-icon>
+            Seguir comprando
+          </button>
+          
+          <button 
+            mat-button 
+            routerLink="/profile/orders"
+            class="action-btn"
+          >
+            <mat-icon>history</mat-icon>
+            Ver mis pedidos
+          </button>
+        </div>
+      </div>
+
+      <!-- Next steps -->
+      <div class="next-steps">
+        <h2 class="steps-title">¿Qué sigue?</h2>
+        <div class="steps-grid grid gap-4">
+          <div class="step-card">
+            <mat-icon class="step-icon">email</mat-icon>
+            <h3>Confirma tu email</h3>
+            <p>Revisa tu bandeja de entrada para el correo de confirmación</p>
+          </div>
+          <div class="step-card">
+            <mat-icon class="step-icon">local_shipping</mat-icon>
+            <h3>Seguimiento del envío</h3>
+            <p>Recibirás un email con el código de seguimiento en 24-48 horas</p>
+          </div>
+          <div class="step-card">
+            <mat-icon class="step-icon">support_agent</mat-icon>
+            <h3>Soporte</h3>
+            <p>¿Tienes preguntas? Contacta a nuestro equipo de soporte</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading state -->
+    <ng-template #loadingState>
+      <div class="loading-state">
+        <mat-spinner diameter="60"></mat-spinner>
+        <p class="mt-4">Cargando información del pedido...</p>
+      </div>
+    </ng-template>
+  </div>
+</app-store-layout>

@@ -1,0 +1,59 @@
+<app-store-layout>
+  <div class="catalog-page">
+    <ngx-spinner 
+      type="ball-scale-multiple"
+      size="medium"
+      color="#2196f3"
+      [fullScreen]="true"
+    ></ngx-spinner>
+
+    <app-product-catalog
+      [products]="products"
+      [totalProducts]="totalProducts"
+      [pageSize]="pageSize"
+      [currentPage]="currentPage"
+      [title]="pageTitle"
+      (pageChanged)="onPageChange($event)"
+      (categoryFilter)="onCategoryFilter($event)"
+      (search)="onSearch($event)"
+    ></app-product-catalog>
+
+    <!-- Featured categories -->
+    <div class="featured-categories mt-12">
+      <h2 class="section-title">Explorar por categoría</h2>
+      <div class="categories-grid grid gap-4 mt-6">
+        <div class="category-card" routerLink="/store/category/book">
+          <div class="category-icon bg-blue-50">
+            <mat-icon class="text-blue-600">menu_book</mat-icon>
+          </div>
+          <h3>Libros</h3>
+          <p>Novelas, ciencia ficción, historia y más</p>
+        </div>
+        
+        <div class="category-card" routerLink="/store/category/movie">
+          <div class="category-icon bg-purple-50">
+            <mat-icon class="text-purple-600">movie</mat-icon>
+          </div>
+          <h3>Películas</h3>
+          <p>Clásicos, acción, drama y documentales</p>
+        </div>
+        
+        <div class="category-card" routerLink="/store/category/vinyl">
+          <div class="category-icon bg-red-50">
+            <mat-icon class="text-red-600">album</mat-icon>
+          </div>
+          <h3>Vinilos</h3>
+          <p>Música clásica, rock, jazz y coleccionables</p>
+        </div>
+        
+        <div class="category-card" routerLink="/store/category/compact-disc">
+          <div class="category-icon bg-green-50">
+            <mat-icon class="text-green-600">music_note</mat-icon>
+          </div>
+          <h3>CDs</h3>
+          <p>Álbumes completos y ediciones especiales</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-store-layout>
