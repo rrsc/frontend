@@ -1,0 +1,138 @@
+<div class="users-admin-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>
+        <mat-icon class="header-icon">people</mat-icon>
+        Gestión de Usuarios
+      </h1>
+      <p class="page-subtitle">Administra los usuarios del sistema</p>
+    </div>
+    
+    <button mat-raised-button color="primary" (click)="createNewUser()">
+      <mat-icon>person_add</mat-icon>
+      Nuevo Usuario
+    </button>
+  </div>
+
+  <!-- Estadísticas -->
+  <div class="stats-cards" *ngIf="stats">
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon total">group</mat-icon>
+          <div class="stat-info">
+            <h3 class="stat-value">{{ stats.total || 0 }}</h3>
+            <p class="stat-label">Total Usuarios</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon active">check_circle</mat-icon>
+          <div class="stat-info">
+            <h3 class="stat-value">{{ stats.active || 0 }}</h3>
+            <p class="stat-label">Activos</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon admin">admin_panel_settings</mat-icon>
+          <div class="stat-info">
+            <h3 class="stat-value">{{ stats.admins || 0 }}</h3>
+            <p class="stat-label">Administradores</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon new">trending_up</mat-icon>
+          <div class="stat-info">
+            <h3 class="stat-value">{{ stats.newThisMonth || 0 }}</h3>
+            <p class="stat-label">Nuevos este mes</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Filtros -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-container">
+        <div class="filter-group">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Buscar usuarios</mat-label>
+            <input matInput [(ngModel)]="searchTerm" 
+                   (keyup.enter)="onSearch()"
+                   placeholder="Nombre, email, username...">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="role-field">
+            <mat-label>Filtrar por rol</mat-label>
+            <mat-select [(ngModel)]="selectedRole" (selectionChange)="onSearch()">
+              <mat-option value="">Todos los roles</mat-option>
+              <mat-option value="USER">Usuario</mat-option>
+              <mat-option value="ADMIN">Administrador</mat-option>
+              <mat-option value="MODERATOR">Moderador</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button mat-raised-button color="accent" (click)="onSearch()" class="search-button">
+            <mat-icon>filter_list</mat-icon>
+            Filtrar
+          </button>
+
+          <button mat-button (click)="clearFilters()" class="clear-button">
+            <mat-icon>clear</mat-icon>
+            Limpiar
+          </button>
+        </div>
+
+        <div class="export-actions">
+          <button mat-button (click)="exportToCSV()">
+            <mat-icon>download</mat-icon>
+            Exportar CSV
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Tabla de usuarios -->
+  <mat-card class="users-table-card">
+    <mat-card-content>
+      <!-- Loading spinner -->
+      <div class="loading-overlay" *ngIf="isLoading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando usuarios...</p>
+      </div>
+
+      <!-- Tabla -->
+      <app-user-table
+        #userTable
+        [users]="users"
+        [totalItems]="totalItems"
+        [pageSize]="pageSize"
+        [currentPage]="currentPage"
+        (pageChange)="onPageChange($event)"
+        (editUser)="onEditUser($event)"
+        (deleteUser)="onDeleteUser($event)"
+        (toggleStatus)="onToggleStatus($event)"
+        (changeRole)="onChangeRole($event)"
+        (selectionChange)="onSelectionChange($event)">
+      </app-user-table>
+    </mat-card-content>
+  </mat-card>
+</div>

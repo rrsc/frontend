@@ -1,0 +1,27 @@
+<div class="inventory-chart">
+  <div class="chart-container">
+    <canvas 
+      baseChart 
+      [data]="chartData"
+      [type]="inventoryChartType"
+      [options]="inventoryChartOptions"
+      [plugins]="inventoryChartPlugins"
+    >
+    </canvas>
+  </div>
+  
+  <div class="chart-legend">
+    <div *ngIf="chartData?.datasets?.[0]?.data" class="legend-items">
+      <div *ngFor="let label of chartData.labels; let i = index" class="legend-item">
+        <div class="legend-color" [style.backgroundColor]="chartData.datasets[0].backgroundColor[i]"></div>
+        <div class="legend-label">{{ label }}</div>
+        <div class="legend-value">
+          {{ chartData.datasets[0].data[i] }} productos
+          <span class="legend-percentage">
+            ({{ getPercentage(i) | number:'1.1-1' }}%)
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

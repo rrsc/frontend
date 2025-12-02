@@ -1,0 +1,165 @@
+<h2 mat-dialog-title>
+  <mat-icon>{{ data.mode === 'create' ? 'person_add' : 'edit' }}</mat-icon>
+  {{ data.mode === 'create' ? 'Nuevo Usuario' : 'Editar Usuario' }}
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="user-form">
+    <!-- Información básica -->
+    <div class="form-section">
+      <h3 class="section-title">Información básica</h3>
+      
+      <div class="row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Nombre</mat-label>
+          <input matInput formControlName="firstName" placeholder="Ej: Juan">
+          <mat-icon matPrefix>person</mat-icon>
+          <mat-error *ngIf="firstName?.invalid">
+            {{ getErrorMessage(firstName) }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Apellido</mat-label>
+          <input matInput formControlName="lastName" placeholder="Ej: Pérez">
+          <mat-error *ngIf="lastName?.invalid">
+            {{ getErrorMessage(lastName) }}
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" placeholder="Ej: juan@email.com" type="email">
+          <mat-icon matPrefix>email</mat-icon>
+          <mat-error *ngIf="email?.invalid">
+            {{ getErrorMessage(email) }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Username</mat-label>
+          <input matInput formControlName="username" placeholder="Ej: juanperez">
+          <mat-icon matPrefix>alternate_email</mat-icon>
+          <mat-error *ngIf="username?.invalid">
+            {{ getErrorMessage(username) }}
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Contraseñas (solo creación) -->
+    <div class="form-section" *ngIf="data.mode === 'create'">
+      <h3 class="section-title">Seguridad</h3>
+      
+      <div class="row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Contraseña</mat-label>
+          <input matInput [type]="hidePassword ? 'password' : 'text'" 
+                 formControlName="password" placeholder="Mínimo 6 caracteres">
+          <mat-icon matPrefix>lock</mat-icon>
+          <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
+            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="password?.invalid">
+            {{ getErrorMessage(password) }}
+          </mat-error>
+          <mat-hint>Debe contener mayúsculas, minúsculas y números</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Confirmar Contraseña</mat-label>
+          <input matInput type="password" formControlName="confirmPassword" 
+                 placeholder="Repite la contraseña">
+          <mat-icon matPrefix>lock_reset</mat-icon>
+          <mat-error *ngIf="confirmPassword?.invalid || userForm.hasError('passwordMismatch')">
+            {{ userForm.hasError('passwordMismatch') ? 'Las contraseñas no coinciden' : getErrorMessage(confirmPassword) }}
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Configuración -->
+    <div class="form-section">
+      <h3 class="section-title">Configuración</h3>
+      
+      <div class="row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Rol</mat-label>
+          <mat-select formControlName="role">
+            <mat-option *ngFor="let role of roles" [value]="role">
+              {{ role }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>security</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Teléfono</mat-label>
+          <input matInput formControlName="phone" placeholder="Ej: +1 234 567 8900">
+          <mat-icon matPrefix>phone</mat-icon>
+          <mat-error *ngIf="phone?.invalid">
+            {{ getErrorMessage(phone) }}
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="row">
+        <mat-checkbox formControlName="active" color="primary">
+          Usuario activo
+        </mat-checkbox>
+      </div>
+    </div>
+
+    <!-- Información adicional -->
+    <div class="form-section">
+      <h3 class="section-title">Información adicional</h3>
+      
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Dirección</mat-label>
+        <textarea matInput formControlName="address" placeholder="Dirección completa" rows="2"></textarea>
+        <mat-icon matPrefix>home</mat-icon>
+      </mat-form-field>
+
+      <div class="row">
+        <mat-form-field appearance="outline" class="third-width">
+          <mat-label>Ciudad</mat-label>
+          <input matInput formControlName="city" placeholder="Ej: Madrid">
+          <mat-icon matPrefix>location_city</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="third-width">
+          <mat-label>País</mat-label>
+          <input matInput formControlName="country" placeholder="Ej: España">
+          <mat-icon matPrefix>public</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="third-width">
+          <mat-label>Código Postal</mat-label>
+          <input matInput formControlName="postalCode" placeholder="Ej: 28001">
+          <mat-icon matPrefix>markunread_mailbox</mat-icon>
+        </mat-form-field>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="isSubmitting">
+    Cancelar
+  </button>
+  
+  <button mat-raised-button 
+          color="primary" 
+          (click)="onSubmit()"
+          [disabled]="userForm.invalid || isSubmitting">
+    <span *ngIf="!isSubmitting">
+      {{ data.mode === 'create' ? 'Crear Usuario' : 'Actualizar Usuario' }}
+    </span>
+    <span *ngIf="isSubmitting">
+      <mat-spinner diameter="20"></mat-spinner>
+      Procesando...
+    </span>
+  </button>
+</mat-dialog-actions>

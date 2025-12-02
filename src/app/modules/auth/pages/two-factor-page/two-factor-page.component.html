@@ -1,0 +1,78 @@
+<div class="two-factor-page">
+  <mat-card class="two-factor-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon class="security-icon">lock</mat-icon>
+        Autenticación en Dos Pasos
+      </mat-card-title>
+      <mat-card-subtitle>
+        Verificación adicional de seguridad
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="two-factor-content">
+        <!-- Información sobre 2FA -->
+        <div class="two-factor-info">
+          <div class="info-section">
+            <h3>¿Qué es la autenticación en dos pasos?</h3>
+            <p>
+              La autenticación en dos pasos añade una capa adicional de seguridad a tu cuenta.
+              Además de tu contraseña, necesitarás un código generado por una aplicación de autenticación.
+            </p>
+          </div>
+
+          <div class="info-section">
+            <h3>Aplicaciones recomendadas</h3>
+            <div class="apps-list">
+              <div class="app-item">
+                <mat-icon>phone_iphone</mat-icon>
+                <span>Google Authenticator</span>
+              </div>
+              <div class="app-item">
+                <mat-icon>android</mat-icon>
+                <span>Authy</span>
+              </div>
+              <div class="app-item">
+                <mat-icon>security</mat-icon>
+                <span>Microsoft Authenticator</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h3>Cómo configurar</h3>
+            <ol class="setup-steps">
+              <li>Descarga una aplicación de autenticación</li>
+              <li>Escanea el código QR en tu perfil</li>
+              <li>Guarda los códigos de respaldo</li>
+              <li>Ingresa el código de 6 dígitos cuando se solicite</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="two-factor-actions">
+          <button 
+            mat-raised-button 
+            color="primary" 
+            routerLink="/auth/login"
+            class="back-btn"
+          >
+            <mat-icon>arrow_back</mat-icon>
+            Volver al inicio de sesión
+          </button>
+
+          <button 
+            mat-stroked-button 
+            routerLink="/profile/security"
+            class="setup-btn"
+          >
+            <mat-icon>settings</mat-icon>
+            Configurar en mi perfil
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

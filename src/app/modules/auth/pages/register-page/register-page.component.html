@@ -1,0 +1,39 @@
+<div class="register-page">
+  <mat-card class="register-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon class="logo-icon">person_add</mat-icon>
+        Crear Cuenta
+      </mat-card-title>
+      <mat-card-subtitle>
+        Únete a MediaStore y descubre nuestro catálogo
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="register-content">
+        <!-- Placeholder para formulario de registro -->
+        <div class="register-placeholder">
+          <mat-icon class="placeholder-icon">engineering</mat-icon>
+          <h3>Formulario de Registro</h3>
+          <p>El formulario de registro se implementará en la próxima sesión.</p>
+          <p>Por ahora, puedes usar las credenciales de prueba o contactar al administrador.</p>
+        </div>
+
+        <!-- Información de la cuenta -->
+        <div class="account-info">
+          <h4>¿Ya tienes una cuenta?</h4>
+          <button 
+            mat-stroked-button 
+            color="primary" 
+            (click)="goToLogin()"
+            class="login-btn"
+          >
+            <mat-icon>login</mat-icon>
+            Iniciar Sesión
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

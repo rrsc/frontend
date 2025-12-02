@@ -1,58 +1,44 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AuthGuard } from '../../core/guards/auth.guard';
-import { RoleGuard } from '../../core/guards/role.guard';
-import { DashboardPageComponent } from './pages/dashboard-page/dashboard-page.component';
-import { ProductsAdminPageComponent } from './pages/products-admin-page/products-admin-page.component';
-import { UsersAdminPageComponent } from './pages/users-admin-page/users-admin-page.component';
-import { SalesAdminPageComponent } from './pages/sales-admin-page/sales-admin-page.component';
-import { ReportsPageComponent } from './pages/reports-page/reports-page.component';
+import { AuthGuard } from './core/guards/auth.guard';
+import { RoleGuard } from './core/guards/role.guard';
 
 const routes: Routes = [
   {
+    path: 'auth',
+    loadChildren: () => import('./modules/auth/auth.module').then(m => m.AuthModule)
+  },
+  {
+    path: 'store',
+    loadChildren: () => import('./modules/store/store.module').then(m => m.StoreModule)
+  },
+  {
+    path: 'admin',
+    loadChildren: () => import('./modules/admin/admin.module').then(m => m.AdminModule),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] }
+  },
+  {
+    path: 'profile',
+    loadChildren: () => import('./modules/profile/profile.module').then(m => m.ProfileModule),
+    canActivate: [AuthGuard]
+  },
+  {
     path: '',
-    component: DashboardPageComponent,
-    canActivate: [AuthGuard, RoleGuard],
-    data: { roles: ['admin', 'manager'] }
-  },
-  {
-    path: 'dashboard',
-    component: DashboardPageComponent,
-    canActivate: [AuthGuard, RoleGuard],
-    data: { roles: ['admin', 'manager'] }
-  },
-  {
-    path: 'products',
-    component: ProductsAdminPageComponent,
-    canActivate: [AuthGuard, RoleGuard],
-    data: { roles: ['admin', 'manager'] }
-  },
-  {
-    path: 'users',
-    component: UsersAdminPageComponent,
-    canActivate: [AuthGuard, RoleGuard],
-    data: { roles: ['admin'] }
-  },
-  {
-    path: 'sales',
-    component: SalesAdminPageComponent,
-    canActivate: [AuthGuard, RoleGuard],
-    data: { roles: ['admin', 'manager'] }
-  },
-  {
-    path: 'reports',
-    component: ReportsPageComponent,
-    canActivate: [AuthGuard, RoleGuard],
-    data: { roles: ['admin', 'manager'] }
+    redirectTo: '/store',
+    pathMatch: 'full'
   },
   {
     path: '**',
-    redirectTo: 'dashboard'
+    redirectTo: '/store'
   }
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
+  imports: [RouterModule.forRoot(routes, {
+    scrollPositionRestoration: 'enabled',
+    anchorScrolling: 'enabled'
+  })],
   exports: [RouterModule]
 })
-export class AdminRoutingModule { }
+export class AppRoutingModule { }
