@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { BreakpointObserver } from '@angular/cdk/layout';
-import { Observable } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { CartService } from '../../services/cart.service';
 
@@ -11,36 +9,49 @@ import { CartService } from '../../services/cart.service';
   styleUrls: ['./store-layout.component.scss']
 })
 export class StoreLayoutComponent implements OnInit {
-  isHandset$: Observable<boolean>;
-  cartItemCount = 0;
-  categories = [
-    { id: 'all', name: 'Todos', icon: 'category' },
-    { id: 'book', name: 'Libros', icon: 'menu_book' },
-    { id: 'movie', name: 'Películas', icon: 'movie' },
-    { id: 'vinyl', name: 'Vinilos', icon: 'album' },
-    { id: 'compact-disc', name: 'CDs', icon: 'music_note' }
-  ];
+  cartItemCount: number = 0;
+  isLoggedIn: boolean = false;
+  user: any = null;
 
   constructor(
-    private breakpointObserver: BreakpointObserver,
+    private authService: AuthService,
     private cartService: CartService,
-    public authService: AuthService
-  ) {
-    this.isHandset$ = this.breakpointObserver.observe(['(max-width: 959px)'])
-      .pipe(
-        map(result => result.matches),
-        shareReplay()
-      );
-  }
+    private router: Router
+  ) {}
 
-  ngOnInit(): void {
-    this.cartService.cart$.subscribe(cart => {
-      this.cartItemCount = cart?.itemCount || 0;
+  ngOnInit() {
+    // Verificar autenticación
+    this.authService.currentUser$.subscribe(user => {
+      this.isLoggedIn = !!user;
+      this.user = user;
+    });
+
+    // Suscribirse a cambios en el carrito
+    this.cartService.getCartObservable().subscribe(cart => {
+      this.cartItemCount = cart?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
     });
   }
 
-  searchProducts(query: string): void {
-    // Implement search logic
-    console.log('Searching for:', query);
+  // Navegación
+  goToHome() {
+    this.router.navigate(['/store']);
+  }
+
+  goToCart() {
+    this.router.navigate(['/store/cart']);
+  }
+
+  goToProfile() {
+    this.router.navigate(['/profile']);
+  }
+
+  goToAdmin() {
+    this.router.navigate(['/admin']);
+  }
+
+  // Autenticación
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/auth/login']);
   }
 }
